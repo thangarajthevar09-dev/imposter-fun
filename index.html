@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -860,4 +861,868 @@
 </footer>
 
 </body>
+=======
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta name="theme-color" content="#050816">
+
+    <title>Imposter Fun</title>
+
+    <!-- Google Font -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet"
+    >
+
+    <!-- Our CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- Main Application -->
+    <div id="app">
+
+        <!-- =========================================
+             HOME SCREEN
+        ========================================== -->
+
+        <section id="homeScreen" class="screen active">
+
+            <div class="home-container">
+
+                <div class="logo-badge">
+                    ⚡
+                </div>
+
+                <div class="eyebrow">
+                    THE PASS-THE-PHONE PARTY GAME
+                </div>
+
+                <h1>
+                    IMPOSTER
+                    <span>FUN</span>
+                </h1>
+
+                <p class="home-description">
+                    One secret word.<br>
+                    Someone is lying.
+                </p>
+
+                <button
+                    id="startGameBtn"
+                    class="primary-btn"
+                >
+                    START GAME
+                    <span>→</span>
+                </button>
+
+                <div class="home-info">
+                    🔒 One phone · 3–12 players · No accounts
+                </div>
+
+                <div class="feature-row">
+
+                    <div class="feature-card">
+                        <div class="feature-icon">👥</div>
+                        <span>3–12 Players</span>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">👁️</div>
+                        <span>Secret Roles</span>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">🔥</div>
+                        <span>Pure Chaos</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================================
+             PLAYER SETUP SCREEN
+        ========================================== -->
+
+        <section id="playersScreen" class="screen">
+
+            <div class="game-container">
+
+                <button
+                    class="back-btn"
+                    id="playersBackBtn"
+                >
+                    ← Back
+                </button>
+
+                <div class="game-card">
+
+                    <div class="eyebrow">
+                        GAME SETUP
+                    </div>
+
+                    <h2>
+                        Who's playing?
+                    </h2>
+
+                    <p class="section-description">
+                        Add everyone around the phone.
+                        You need at least 3 players.
+                    </p>
+
+                    <div class="player-input-row">
+
+                        <input
+                            type="text"
+                            id="playerNameInput"
+                            placeholder="Player name"
+                            maxlength="24"
+                        >
+
+                        <button
+                            id="addPlayerBtn"
+                            class="primary-btn small"
+                        >
+                            + ADD
+                        </button>
+
+                    </div>
+
+                    <div
+                        id="playersList"
+                        class="players-list"
+                    >
+                        <!-- Players will be inserted by JavaScript -->
+                    </div>
+
+                    <div class="bottom-row">
+
+                        <span
+                            id="playerCountText"
+                            class="muted-text"
+                        >
+                            0/12 players
+                        </span>
+
+                        <button
+                            id="playersContinueBtn"
+                            class="primary-btn"
+                            disabled
+                        >
+                            CONTINUE →
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================================
+             CATEGORY SCREEN
+        ========================================== -->
+
+        <section id="categoryScreen" class="screen">
+
+            <div class="game-container">
+
+                <button
+                    class="back-btn"
+                    id="categoryBackBtn"
+                >
+                    ← Back
+                </button>
+
+                <div class="game-card">
+
+                    <div class="eyebrow">
+                        GAME SETUP
+                    </div>
+
+                    <h2>
+                        Pick the secret world
+                    </h2>
+
+                    <p class="section-description">
+                        Choose a category or create your own.
+                    </p>
+
+                    <div
+                        id="categoryGrid"
+                        class="category-grid"
+                    >
+
+                        <!-- Categories inserted by JavaScript -->
+
+                    </div>
+
+                    <button
+                        id="customCategoryBtn"
+                        class="custom-category-btn"
+                    >
+                        ＋ CREATE CUSTOM CATEGORY
+                    </button>
+
+                    <div
+                        id="customCategoryForm"
+                        class="custom-form hidden"
+                    >
+
+                        <label>
+                            Category Name
+
+                            <input
+                                type="text"
+                                id="customCategoryName"
+                                placeholder="College Friends"
+                            >
+                        </label>
+
+                        <label>
+                            Secret Words
+
+                            <span class="input-help">
+                                Add at least 5 words separated by commas
+                            </span>
+
+                            <textarea
+                                id="customCategoryWords"
+                                placeholder="Rahul, Arjun, Karan, Vivek, Thangaraj"
+                            ></textarea>
+
+                        </label>
+
+                    </div>
+
+                    <div class="bottom-row">
+
+                        <span
+                            id="categoryStatus"
+                            class="muted-text"
+                        >
+                            Choose a category
+                        </span>
+
+                        <button
+                            id="categoryContinueBtn"
+                            class="primary-btn"
+                            disabled
+                        >
+                            CONTINUE →
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================================
+             IMPOSTER COUNT SCREEN
+        ========================================== -->
+
+        <section id="imposterScreen" class="screen">
+
+            <div class="game-container">
+
+                <button
+                    class="back-btn"
+                    id="imposterBackBtn"
+                >
+                    ← Back
+                </button>
+
+                <div class="game-card">
+
+                    <div class="eyebrow">
+                        GAME SETUP
+                    </div>
+
+                    <h2>
+                        How many imposters?
+                    </h2>
+
+                    <p class="section-description">
+                        Choose how many players will secretly
+                        become imposters.
+                    </p>
+
+                    <div class="imposter-options">
+
+                        <button
+                            class="imposter-option selected"
+                            data-count="1"
+                        >
+                            <strong>1</strong>
+                            <span>Lone Wolf</span>
+                        </button>
+
+                        <button
+                            class="imposter-option"
+                            data-count="2"
+                        >
+                            <strong>2</strong>
+                            <span>Double Trouble</span>
+                        </button>
+
+                        <button
+                            class="imposter-option"
+                            data-count="3"
+                        >
+                            <strong>3</strong>
+                            <span>Triple Threat</span>
+                        </button>
+
+                    </div>
+
+                    <div class="info-box">
+
+                        🛡️
+
+                        <span>
+                            Recent imposters get a lower chance
+                            next round, keeping the game fair
+                            without creating a predictable rotation.
+                        </span>
+
+                    </div>
+
+                    <div class="bottom-row">
+
+                        <span
+                            id="imposterLimitText"
+                            class="muted-text"
+                        >
+                            Maximum: 1 imposter
+                        </span>
+
+                        <button
+                            id="imposterContinueBtn"
+                            class="primary-btn"
+                        >
+                            CONTINUE →
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================================
+             DARE SCREEN
+        ========================================== -->
+
+        <section id="dareScreen" class="screen">
+
+            <div class="game-container">
+
+                <button
+                    class="back-btn"
+                    id="dareBackBtn"
+                >
+                    ← Back
+                </button>
+
+                <div class="game-card">
+
+                    <div class="eyebrow">
+                        GAME SETUP
+                    </div>
+
+                    <h2>
+                        Dare for this round?
+                    </h2>
+
+                    <p class="section-description">
+                        Decide before the game starts.
+                        The dare stays hidden until the result.
+                    </p>
+
+                    <div class="dare-options">
+
+                        <button
+                            id="dareYesBtn"
+                            class="dare-option"
+                        >
+                            <strong>YES</strong>
+                            <span>Add a dare</span>
+                        </button>
+
+                        <button
+                            id="dareNoBtn"
+                            class="dare-option"
+                        >
+                            <strong>NO</strong>
+                            <span>Skip the dare</span>
+                        </button>
+
+                    </div>
+
+                    <div
+                        id="dareInputContainer"
+                        class="custom-form hidden"
+                    >
+
+                        <label>
+                            Enter Dare
+
+                            <textarea
+                                id="dareInput"
+                                maxlength="160"
+                                placeholder="Sing a song for 20 seconds."
+                            ></textarea>
+
+                        </label>
+
+                        <div class="input-help">
+                            🔒 The dare will remain hidden during
+                            all private player reveals.
+                        </div>
+
+                    </div>
+
+                    <div class="bottom-row">
+
+                        <span
+                            id="dareStatus"
+                            class="muted-text"
+                        >
+                            Choose YES or NO
+                        </span>
+
+                        <button
+                            id="startRoundBtn"
+                            class="primary-btn"
+                            disabled
+                        >
+                            START ROUND ⚡
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================================
+             GAME READY SCREEN
+        ========================================== -->
+
+        <section id="readyScreen" class="screen">
+
+            <div class="center-card">
+
+                <div class="big-icon">
+                    🔒
+                </div>
+
+                <div class="eyebrow">
+                    ROUND READY
+                </div>
+
+                <h2>
+                    Pass the phone.
+                </h2>
+
+                <p>
+                    Each player will secretly view their role.
+                    Keep the screen private and hand it over.
+                </p>
+
+                <button
+                    id="startRevealBtn"
+                    class="primary-btn"
+                >
+                    START REVEALS →
+                </button>
+
+                <div class="privacy-text">
+                    🔒 One player at a time
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================================
+             PRIVATE REVEAL SCREEN
+        ========================================== -->
+
+        <section id="revealScreen" class="screen">
+
+            <div class="reveal-container">
+
+                <div class="progress-container">
+
+                    <div
+                        id="revealProgressText"
+                        class="progress-text"
+                    >
+                        PLAYER 1 OF 5
+                    </div>
+
+                    <div class="progress-bar">
+                        <div
+                            id="revealProgress"
+                            class="progress-fill"
+                        ></div>
+                    </div>
+
+                </div>
+
+                <div
+                    id="revealCard"
+                    class="reveal-card"
+                >
+
+                    <!-- Reveal content inserted by JavaScript -->
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================================
+             PASS PHONE SCREEN
+        ========================================== -->
+
+        <section id="passScreen" class="screen">
+
+            <div class="center-card">
+
+                <div class="big-icon">
+                    📱
+                </div>
+
+                <div class="eyebrow">
+                    PASS THE PHONE
+                </div>
+
+                <h2 id="passPlayerName">
+                    Give it to Rahul.
+                </h2>
+
+                <p>
+                    Make sure the previous player has
+                    looked away before continuing.
+                </p>
+
+                <button
+                    id="nextRevealBtn"
+                    class="primary-btn"
+                >
+                    REVEAL ROLE →
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================================
+             DISCUSSION SCREEN
+        ========================================== -->
+
+        <section id="discussionScreen" class="screen">
+
+            <div class="center-card">
+
+                <div class="big-icon">
+                    👥
+                </div>
+
+                <div class="eyebrow">
+                    EVERYONE READY?
+                </div>
+
+                <h2>
+                    Put the phone down.
+                </h2>
+
+                <p>
+                    Give clues, ask questions, and debate
+                    who doesn't know the secret word.
+                </p>
+
+                <div class="discussion-tips">
+
+                    <div>
+                        <span>01</span>
+                        Give a clue without saying the word.
+                    </div>
+
+                    <div>
+                        <span>02</span>
+                        Watch who seems unsure.
+                    </div>
+
+                    <div>
+                        <span>03</span>
+                        Vote when you're ready.
+                    </div>
+
+                </div>
+
+                <button
+                    id="goVotingBtn"
+                    class="primary-btn"
+                >
+                    GO TO VOTING →
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================================
+             VOTING SCREEN
+        ========================================== -->
+
+        <section id="votingScreen" class="screen">
+
+            <div class="game-container">
+
+                <div class="game-card">
+
+                    <div class="section-header-row">
+
+                        <div>
+
+                            <div class="eyebrow">
+                                FINAL CALL
+                            </div>
+
+                            <h2>
+                                Who are the imposters?
+                            </h2>
+
+                            <p class="section-description">
+                                Select exactly
+                                <span id="requiredVoteCount">1</span>
+                                player.
+                            </p>
+
+                        </div>
+
+                        <div
+                            id="voteCounter"
+                            class="vote-counter"
+                        >
+                            0 / 1
+                        </div>
+
+                    </div>
+
+                    <div
+                        id="voteList"
+                        class="vote-list"
+                    >
+                        <!-- Vote buttons inserted by JavaScript -->
+                    </div>
+
+                    <div class="bottom-row">
+
+                        <span
+                            id="voteStatus"
+                            class="muted-text"
+                        >
+                            Choose carefully.
+                        </span>
+
+                        <button 
+                            id="submitVoteBtn"
+                            class="primary-btn"
+                            disabled
+                        >
+                            SUBMIT VOTE ✓
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================================
+             VOTE REVEAL SCREEN
+        ========================================== -->
+
+        <section id="voteRevealScreen" class="screen">
+
+            <div class="reveal-container">
+
+                <div class="progress-container">
+
+                    <div
+                        id="voteRevealProgressText"
+                        class="progress-text"
+                    >
+                        VOTE REVEAL
+                    </div>
+
+                    <div class="progress-bar">
+                        <div
+                            id="voteRevealProgress"
+                            class="progress-fill"
+                        ></div>
+                    </div>
+
+                </div>
+
+                <div
+                    id="voteRevealCard"
+                    class="reveal-card"
+                >
+                    <!-- Vote reveal inserted by JavaScript -->
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================================
+             RESULT SCREEN
+        ========================================== -->
+
+        <section id="resultScreen" class="screen">
+
+            <div class="result-container">
+
+                <div
+                    id="resultIcon"
+                    class="result-icon"
+                >
+                    ✓
+                </div>
+
+                <div
+                    id="resultEyebrow"
+                    class="eyebrow"
+                >
+                    ROUND WON
+                </div>
+
+                <h1 id="resultTitle">
+                    IMPOSTERS CAUGHT!
+                </h1>
+
+                <p
+                    id="resultDescription"
+                    class="result-description"
+                >
+                    The group saw through the lies.
+                </p>
+
+                <div class="actual-imposters">
+
+                    <div class="result-label">
+                        ACTUAL IMPOSTERS
+                    </div>
+
+                    <div
+                        id="actualImpostersList"
+                        class="actual-list"
+                    >
+                        <!-- Imposters inserted by JavaScript -->
+                    </div>
+
+                </div>
+
+                <div
+                    id="dareResult"
+                    class="dare-result hidden"
+                >
+
+                    <div class="dare-title">
+                        🎯 DARE TIME
+                    </div>
+
+                    <p id="dareResultMessage"></p>
+
+                    <blockquote id="finalDare"></blockquote>
+
+                </div>
+
+                <div class="result-buttons">
+
+                    <button
+                        id="playAgainBtn"
+                        class="primary-btn"
+                    >
+                        ↻ PLAY AGAIN
+                    </button>
+
+                    <button
+                        id="newPlayersBtn"
+                        class="secondary-btn"
+                    >
+                        👥 NEW PLAYERS
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </div>
+
+
+    <!-- Our JavaScript -->
+    <script src="script.js"></script>
+
+
+    <footer class="creator-footer">
+
+    <div class="creator-name">
+        Created by Thangaraj Thevar
+    </div>
+
+    <a
+        href="https://instagram.com/_.thangaraj2006"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="creator-instagram"
+    >
+      Follow ME On Instagram!
+    </a>
+
+</footer>
+
+</body>
+>>>>>>> 5196cfa6028afc15ab27b7bc237eb2ece1972928
 </html>
