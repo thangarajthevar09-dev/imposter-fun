@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 /* =========================================================
    IMPOSTER FUN
    Premium Blue + Black Party Game
@@ -1988,7 +1988,6 @@ textarea:focus-visible {
 .creator-instagram:hover {
     color: #ffffff;
     text-decoration: underline;
-=======
 /* =========================================================
    IMPOSTER FUN
    Premium Blue + Black Party Game
@@ -3978,5 +3977,121 @@ textarea:focus-visible {
 .creator-instagram:hover {
     color: #ffffff;
     text-decoration: underline;
->>>>>>> 5196cfa6028afc15ab27b7bc237eb2ece1972928
+}
+/* =========================================
+   FIX: TEXT VISIBILITY / DARK TEXT
+   ========================================= */
+
+body {
+    color: #f8fafc;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+span,
+label,
+div {
+    color: inherit;
+}
+
+/* Main headings */
+h1,
+h2 {
+    color: #ffffff;
+}
+
+/* Smaller descriptive text */
+p,
+.section-description,
+.home-description {
+    color: #cbd5e1;
+}
+
+/* Eyebrow / small uppercase text */
+.eyebrow {
+    color: #94a3b8;
+}
+
+/* Player/category text */
+.category-grid,
+.category-grid *,
+.player-input-row,
+.players-list,
+.players-list *,
+.imposter-options,
+.imposter-options *,
+.dare-options,
+.dare-options *,
+.vote-list,
+.vote-list * {
+    color: #f8fafc;
+}
+
+/* Category names */
+.category-card,
+.category-card *,
+.category-name {
+    color: #f8fafc;
+}
+
+/* Muted text */
+.muted-text {
+    color: #94a3b8;
+}
+
+/* Input text */
+input,
+textarea {
+    color: #ffffff;
+    background: #0f172a;
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: #64748b;
+}
+
+/* Labels */
+label {
+    color: #f8fafc;
+}
+
+/* Info boxes */
+.info-box,
+.info-box * {
+    color: #cbd5e1;
+}
+
+/* Feature cards */
+.feature-card,
+.feature-card * {
+    color: #e2e8f0;
+}
+
+/* Bottom text */
+.bottom-row,
+.bottom-row * {
+    color: #cbd5e1;
+}
+
+/* Custom category button */
+.custom-category-btn {
+    color: #e2e8f0;
+}
+
+/* Back buttons */
+.back-btn {
+    color: #cbd5e1;
+}
+
+/* Selected category */
+.category-card.selected,
+.category-card.selected * {
+    color: #ffffff;
+}
 }
