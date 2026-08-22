@@ -2267,7 +2267,6 @@ function renderResult() {
 
     renderDareResult();
 }
-
 /* =========================================================
    ACTUAL IMPOSTERS
 ========================================================= */
@@ -2281,8 +2280,19 @@ function renderActualImposters() {
 
     list.innerHTML = "";
 
+    if (!imposters.length) {
+
+        list.innerHTML = `
+            <div class="final-player">
+                No imposters found.
+            </div>
+        `;
+
+        return;
+    }
+
     imposters.forEach(
-        i => {
+        index => {
 
             const div =
                 document.createElement(
@@ -2292,34 +2302,115 @@ function renderActualImposters() {
             div.className =
                 "final-player actual";
 
-            const caught =
-                selectedVotes.includes(i);
-
             div.innerHTML = `
                 <span class="avatar">
                     ${esc(
-                        players[i][0]
+                        players[index][0]
                             .toUpperCase()
                     )}
                 </span>
 
                 <span class="final-player-name">
-                    ${esc(players[i])}
+                    ${esc(players[index])}
+                </span>
+            `;
+
+            list.appendChild(div);
+        }
+    );
+
+    renderSelectedByVoting();
+}
+
+
+/* =========================================================
+   SELECTED BY VOTING
+========================================================= */
+
+function renderSelectedByVoting() {
+
+    /*
+       Find an existing voting-result container.
+       If it doesn't exist, create one automatically.
+    */
+
+    let section =
+        $("selectedByVotingSection");
+
+    let list =
+        $("selectedByVotingList");
+
+    if (!section) {
+
+        const actualList =
+            $("actualImpostersList");
+
+        if (!actualList) return;
+
+        section =
+            document.createElement("div");
+
+        section.id =
+            "selectedByVotingSection";
+
+        section.className =
+            "result-voting-section";
+
+        section.innerHTML = `
+            <div class="result-section-title">
+                🗳️ SELECTED BY VOTING
+            </div>
+
+            <div id="selectedByVotingList"></div>
+        `;
+
+        actualList.parentElement?.appendChild(
+            section
+        );
+
+        list =
+            section.querySelector(
+                "#selectedByVotingList"
+            );
+    }
+
+    if (!list) return;
+
+    list.innerHTML = "";
+
+    if (!selectedVotes.length) {
+
+        list.innerHTML = `
+            <div class="final-player">
+                No players were selected.
+            </div>
+        `;
+
+        return;
+    }
+
+    selectedVotes.forEach(
+        index => {
+
+            const div =
+                document.createElement(
+                    "div"
+                );
+
+            div.className =
+                "final-player voted";
+
+            div.innerHTML = `
+                <span class="avatar">
+                    ${esc(
+                        players[index][0]
+                            .toUpperCase()
+                    )}
                 </span>
 
-                ${
-                    caught
-                        ? `
-                            <span class="correct-mark">
-                                CAUGHT ✓
-                            </span>
-                        `
-                        : `
-                            <span class="miss-mark">
-                                ESCAPED ✕
-                            </span>
-                        `
-                }
+                <span class="final-player-name">
+                    ${esc(players[index])}
+                </span>
             `;
 
             list.appendChild(div);
