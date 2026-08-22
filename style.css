@@ -5002,3 +5002,87 @@ select:focus-visible,
 .screen.active {
     display: block !important;
 }
+
+body {
+    min-height: 100vh;
+    margin: 0;
+}
+
+.creator-footer {
+    width: 100%;
+    padding: 20px 0;
+    text-align: center;
+    position: relative;
+    z-index: 10;
+}
+
+.creator-name {
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.creator-instagram {
+    text-decoration: none;
+    font-size: 14px;
+}
+
+/* =========================================================
+   CREATOR FOOTER
+========================================================= */
+
+.creator-footer {
+    display: block !important;
+    position: relative !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 70px !important;
+    padding: 20px 0 !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+    text-align: center !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    z-index: 9999 !important;
+    overflow: visible !important;
+}
+
+.creator-name {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    margin-bottom: 8px !important;
+}
+
+.creator-instagram {
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: relative !important;
+    z-index: 10000 !important;
+}
+.creator-footer {
+    display: block !important;
+    position: relative !important;
+    width: 100% !important;
+    min-height: 100px !important;
+    padding: 30px 20px !important;
+    margin-top: 30px !important;
+    box-sizing: border-box !important;
+    text-align: center !important;
+    z-index: 999999 !important;
+    background: #111 !important;
+}
+
+.creator-name {
+    display: block !important;
+    font-size: 18px !important;
+    margin-bottom: 12px !important;
+    color: white !important;
+}
+
+.creator-instagram {
+    display: inline-block !important;
+    color: #ff4b91 !important;
+    font-size: 16px !important;
+    text-decoration: none !important;
+}
