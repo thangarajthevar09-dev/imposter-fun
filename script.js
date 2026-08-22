@@ -1,11 +1,28 @@
 /* =========================================================
-   IMPOSTER FUN — FULL GAME LOGIC
+   IMPOSTER FUN — COMPLETE GAME LOGIC
+   =========================================================
+   FLOW:
+   HOME
+   → PLAYERS
+   → CATEGORY
+   → IMPOSTER COUNT
+   → DARE
+   → PRIVATE PLAYER REVEAL
+   → DISCUSSION + RANDOM WHEEL
+   → VOTING
+   → VOTE REVEAL
+   → RESULT
+   → DARE ASSIGNMENT
 
-   Features:
-   1. Combined PASS PHONE + YOU ARE screen
-   2. Random speaker spin wheel
-   3. Prevent inactive screens from scrolling
-   4. Multiple escaped imposters can select civilians
+   DARE RULES:
+   ✓ All caught imposters must do the dare
+   ✓ Every escaped imposter chooses one civilian
+   ✓ Escaped imposters themselves do NOT do the dare
+   ✓ No civilian can be selected twice
+   ✓ Final dare message combines:
+       CAUGHT IMPOSTERS + SELECTED CIVILIANS
+   ✓ Final dare message stays visible
+   ✓ Result list clearly shows EVERYONE who must do the dare
 ========================================================= */
 
 "use strict";
@@ -230,21 +247,17 @@ let selectedVotes = [];
 let voteRevealIndex = 0;
 
 let result = null;
+
 let randomSpeakingPlayer = null;
 
-/*
-   Stores all civilians selected for the dare.
-   Example:
-   1 escaped imposter -> [2]
-   2 escaped imposters -> [2, 5]
-   3 escaped imposters -> [1, 4, 6]
-*/
 let dareAssignedPlayers = [];
+
+let finalDarePlayers = [];
 
 let wheelSpinning = false;
 
 /* =========================================================
-   DOM
+   DOM HELPERS
 ========================================================= */
 
 const $ = id => document.getElementById(id);
@@ -308,52 +321,71 @@ const pickRandomPlayerBtn = $("pickRandomPlayerBtn");
 
 function showScreen(screen) {
 
-    Object.values(screens).forEach(s => {
+    Object.values(screens).forEach(screenElement => {
 
-        if (!s) return;
+        if (!screenElement) return;
 
-        s.classList.remove("active");
-        s.setAttribute("aria-hidden", "true");
+        screenElement.classList.remove("active");
+        screenElement.setAttribute("aria-hidden", "true");
     });
 
-    if (screen) {
+    if (!screen) return;
 
-        screen.classList.add("active");
-        screen.setAttribute("aria-hidden", "false");
-    }
+    screen.classList.add("active");
+    screen.setAttribute("aria-hidden", "false");
 
     document.documentElement.scrollTop = 0;
     document.body.scrollTop = 0;
 
-    window.scrollTo(0, 0);
+    window.scrollTo({
+        top: 0,
+        left: 0,
+        behavior: "instant"
+    });
 }
 
 /* =========================================================
    HELPERS
 ========================================================= */
 
-const randomItem = arr =>
-    arr?.length
-        ? arr[Math.floor(Math.random() * arr.length)]
-        : null;
+function randomItem(array) {
 
-
-function shuffle(arr) {
-
-    for (let i = arr.length - 1; i > 0; i--) {
-
-        const j =
-            Math.floor(
-                Math.random() * (i + 1)
-            );
-
-        [arr[i], arr[j]] =
-            [arr[j], arr[i]];
+    if (!array || !array.length) {
+        return null;
     }
 
-    return arr;
+    return array[
+        Math.floor(
+            Math.random() * array.length
+        )
+    ];
 }
 
+function shuffle(array) {
+
+    const copy = [...array];
+
+    for (
+        let i = copy.length - 1;
+        i > 0;
+        i--
+    ) {
+
+        const j = Math.floor(
+            Math.random() * (i + 1)
+        );
+
+        [
+            copy[i],
+            copy[j]
+        ] = [
+            copy[j],
+            copy[i]
+        ];
+    }
+
+    return copy;
+}
 
 function esc(value) {
 
@@ -365,7 +397,6 @@ function esc(value) {
         .replace(/'/g, "&#039;");
 }
 
-
 function maxImposters() {
 
     return Math.max(
@@ -374,11 +405,10 @@ function maxImposters() {
     );
 }
 
-
 function categoryName() {
 
     return selectedCategories
-        .map(c => c.name)
+        .map(category => category.name)
         .join(" + ");
 }
 
@@ -429,13 +459,14 @@ function addPlayer() {
         return;
     }
 
-    if (
+    const duplicate =
         players.some(
-            p =>
-                p.toLowerCase() ===
+            player =>
+                player.toLowerCase() ===
                 name.toLowerCase()
-        )
-    ) {
+        );
+
+    if (duplicate) {
 
         alert(
             "That player is already added."
@@ -453,26 +484,23 @@ function addPlayer() {
     playerNameInput.focus();
 }
 
-
 addPlayerBtn?.addEventListener(
     "click",
     addPlayer
 );
 
-
 playerNameInput?.addEventListener(
     "keydown",
-    e => {
+    event => {
 
-        if (e.key === "Enter") {
+        if (event.key === "Enter") {
 
-            e.preventDefault();
+            event.preventDefault();
 
             addPlayer();
         }
     }
 );
-
 
 function renderPlayers() {
 
@@ -481,7 +509,7 @@ function renderPlayers() {
     playersList.innerHTML = "";
 
     players.forEach(
-        (name, i) => {
+        (name, index) => {
 
             const card =
                 document.createElement(
@@ -494,7 +522,7 @@ function renderPlayers() {
             card.innerHTML = `
                 <div class="avatar">
                     ${esc(
-                        name[0].toUpperCase()
+                        name.charAt(0).toUpperCase()
                     )}
                 </div>
 
@@ -503,45 +531,39 @@ function renderPlayers() {
                 </span>
             `;
 
-            const edit =
+            const editButton =
                 document.createElement(
                     "button"
                 );
 
-            edit.type = "button";
-            edit.textContent = "EDIT";
+            editButton.type = "button";
+            editButton.textContent = "EDIT";
 
-            edit.addEventListener(
+            editButton.addEventListener(
                 "click",
-                () => {
-                    editPlayer(i);
-                }
+                () => editPlayer(index)
             );
 
-            const remove =
+            const removeButton =
                 document.createElement(
                     "button"
                 );
 
-            remove.type = "button";
-            remove.textContent = "×";
-            remove.style.fontSize = "20px";
+            removeButton.type = "button";
+            removeButton.textContent = "×";
+            removeButton.style.fontSize = "20px";
 
-            remove.addEventListener(
+            removeButton.addEventListener(
                 "click",
-                () => {
-                    removePlayer(i);
-                }
+                () => removePlayer(index)
             );
 
             card.append(
-                edit,
-                remove
+                editButton,
+                removeButton
             );
 
-            playersList.appendChild(
-                card
-            );
+            playersList.appendChild(card);
         }
     );
 
@@ -560,30 +582,33 @@ function renderPlayers() {
     updateImposterOptions();
 }
 
+function editPlayer(index) {
 
-function editPlayer(i) {
+    const oldName =
+        players[index];
 
-    const newName =
+    const edited =
         prompt(
             "Edit player name:",
-            players[i]
+            oldName
         );
 
-    if (newName === null) return;
+    if (edited === null) return;
 
     const name =
-        newName.trim();
+        edited.trim();
 
     if (!name) return;
 
-    if (
+    const duplicate =
         players.some(
-            (p, index) =>
-                index !== i &&
-                p.toLowerCase() ===
+            (player, i) =>
+                i !== index &&
+                player.toLowerCase() ===
                 name.toLowerCase()
-        )
-    ) {
+        );
+
+    if (duplicate) {
 
         alert(
             "That player name already exists."
@@ -592,15 +617,14 @@ function editPlayer(i) {
         return;
     }
 
-    players[i] = name;
+    players[index] = name;
 
     renderPlayers();
 }
 
+function removePlayer(index) {
 
-function removePlayer(i) {
-
-    players.splice(i, 1);
+    players.splice(index, 1);
 
     if (
         imposterCount >
@@ -614,7 +638,6 @@ function removePlayer(i) {
     renderPlayers();
 }
 
-
 playersBackBtn?.addEventListener(
     "click",
     () => {
@@ -624,7 +647,6 @@ playersBackBtn?.addEventListener(
         );
     }
 );
-
 
 playersContinueBtn?.addEventListener(
     "click",
@@ -648,7 +670,7 @@ playersContinueBtn?.addEventListener(
 );
 
 /* =========================================================
-   CATEGORIES
+   CATEGORY
 ========================================================= */
 
 function renderCategories() {
@@ -658,7 +680,7 @@ function renderCategories() {
     categoryGrid.innerHTML = "";
 
     categories.forEach(
-        (cat, i) => {
+        (category, index) => {
 
             const button =
                 document.createElement(
@@ -670,13 +692,14 @@ function renderCategories() {
             button.className =
                 "category-option";
 
-            if (
+            const selected =
                 selectedCategories.some(
-                    c =>
-                        c.name ===
-                        cat.name
-                )
-            ) {
+                    item =>
+                        item.name ===
+                        category.name
+                );
+
+            if (selected) {
 
                 button.classList.add(
                     "selected"
@@ -685,11 +708,11 @@ function renderCategories() {
 
             button.innerHTML = `
                 <span class="category-icon">
-                    ${cat.icon}
+                    ${category.icon}
                 </span>
 
                 <span>
-                    ${esc(cat.name)}
+                    ${esc(category.name)}
                 </span>
             `;
 
@@ -697,18 +720,18 @@ function renderCategories() {
                 "click",
                 () => {
 
-                    selectCategory(i);
+                    selectCategory(index);
                 }
             );
 
-            categoryGrid.appendChild(
-                button
-            );
+            categoryGrid.appendChild(button);
         }
     );
 
     if (
-        customCategory?.words?.length
+        customCategory &&
+        customCategory.words &&
+        customCategory.words.length
     ) {
 
         const button =
@@ -721,13 +744,14 @@ function renderCategories() {
         button.className =
             "category-option";
 
-        if (
+        const selected =
             selectedCategories.some(
-                c =>
-                    c.name ===
+                category =>
+                    category.name ===
                     customCategory.name
-            )
-        ) {
+            );
+
+        if (selected) {
 
             button.classList.add(
                 "selected"
@@ -740,9 +764,7 @@ function renderCategories() {
             </span>
 
             <span>
-                ${esc(
-                    customCategory.name
-                )}
+                ${esc(customCategory.name)}
             </span>
         `;
 
@@ -756,72 +778,74 @@ function renderCategories() {
             }
         );
 
-        categoryGrid.appendChild(
-            button
-        );
+        categoryGrid.appendChild(button);
     }
 
     updateCategoryUI();
 }
 
+function selectCategory(index) {
 
-function selectCategory(i) {
+    const category =
+        categories[index];
 
-    const cat =
-        categories[i];
+    if (!category) return;
 
-    if (!cat) return;
-
-    if (cat.name === "Random") {
+    if (category.name === "Random") {
 
         const available =
             categories.filter(
-                c =>
-                    c.name !== "Random" &&
-                    c.words.length
+                item =>
+                    item.name !== "Random" &&
+                    item.words.length > 0
             );
 
-        selectedCategories = [
-            randomItem(available)
-        ];
+        const randomCategory =
+            randomItem(available);
 
-        customCategory = null;
+        if (!randomCategory) return;
+
+        selectedCategories = [
+            randomCategory
+        ];
 
         renderCategories();
 
         return;
     }
 
-    toggleCategory(cat);
+    toggleCategory(category);
 }
 
+function toggleCategory(category) {
 
-function toggleCategory(cat) {
-
-    const i =
+    const index =
         selectedCategories.findIndex(
-            c =>
-                c.name ===
-                cat.name
+            item =>
+                item.name ===
+                category.name
         );
 
-    if (i >= 0) {
+    if (index >= 0) {
 
         selectedCategories.splice(
-            i,
+            index,
             1
         );
 
     } else {
 
         selectedCategories.push(
-            cat
+            category
         );
     }
 
     renderCategories();
 }
 
+/* =========================================================
+   CUSTOM CATEGORY
+========================================================= */
 
 customCategoryBtn?.addEventListener(
     "click",
@@ -843,7 +867,6 @@ customCategoryBtn?.addEventListener(
     }
 );
 
-
 function updateCustomCategory() {
 
     if (
@@ -860,15 +883,10 @@ function updateCustomCategory() {
     const words =
         customCategoryWords.value
             .split(",")
-            .map(
-                w => w.trim()
-            )
+            .map(word => word.trim())
             .filter(Boolean);
 
-    if (
-        !name ||
-        !words.length
-    ) {
+    if (!name || !words.length) {
 
         return;
     }
@@ -879,39 +897,41 @@ function updateCustomCategory() {
         words
     };
 
-    const i =
+    const existingIndex =
         selectedCategories.findIndex(
-            c =>
-                c.name === name
+            category =>
+                category.name === name
         );
 
-    if (i < 0) {
+    if (existingIndex >= 0) {
+
+        selectedCategories[
+            existingIndex
+        ] = customCategory;
+
+    } else {
 
         selectedCategories.push(
             customCategory
         );
-
-    } else {
-
-        selectedCategories[i] =
-            customCategory;
     }
 
     renderCategories();
 }
-
 
 customCategoryName?.addEventListener(
     "input",
     updateCustomCategory
 );
 
-
 customCategoryWords?.addEventListener(
     "input",
     updateCustomCategory
 );
 
+/* =========================================================
+   CATEGORY UI
+========================================================= */
 
 function updateCategoryUI() {
 
@@ -943,7 +963,6 @@ function updateCategoryUI() {
     }
 }
 
-
 categoryBackBtn?.addEventListener(
     "click",
     () => {
@@ -953,7 +972,6 @@ categoryBackBtn?.addEventListener(
         );
     }
 );
-
 
 categoryContinueBtn?.addEventListener(
     "click",
@@ -977,7 +995,7 @@ categoryContinueBtn?.addEventListener(
 );
 
 /* =========================================================
-   IMPOSTERS
+   IMPOSTER SETUP
 ========================================================= */
 
 const imposterLabels = {
@@ -995,19 +1013,20 @@ const imposterLabels = {
     11: "Almost Everyone"
 };
 
-
 function updateImposterOptions() {
 
     if (!players.length) return;
 
-    const max =
+    const maximum =
         maxImposters();
 
     if (
-        imposterCount > max
+        imposterCount >
+        maximum
     ) {
 
-        imposterCount = max;
+        imposterCount =
+            maximum;
     }
 
     const container =
@@ -1020,9 +1039,9 @@ function updateImposterOptions() {
     container.innerHTML = "";
 
     for (
-        let n = 1;
-        n <= max;
-        n++
+        let count = 1;
+        count <= maximum;
+        count++
     ) {
 
         const button =
@@ -1036,7 +1055,8 @@ function updateImposterOptions() {
             "imposter-option";
 
         if (
-            n === imposterCount
+            count ===
+            imposterCount
         ) {
 
             button.classList.add(
@@ -1046,13 +1066,13 @@ function updateImposterOptions() {
 
         button.innerHTML = `
             <strong>
-                ${n}
+                ${count}
             </strong>
 
             <span>
                 ${
-                    imposterLabels[n] ||
-                    `${n} Imposters`
+                    imposterLabels[count] ||
+                    `${count} Imposters`
                 }
             </span>
         `;
@@ -1061,7 +1081,8 @@ function updateImposterOptions() {
             "click",
             () => {
 
-                imposterCount = n;
+                imposterCount =
+                    count;
 
                 updateImposterOptions();
             }
@@ -1075,12 +1096,13 @@ function updateImposterOptions() {
     if (imposterLimitText) {
 
         imposterLimitText.textContent =
-            `Maximum: ${max} imposter${
-                max === 1 ? "" : "s"
+            `Maximum: ${maximum} imposter${
+                maximum === 1
+                    ? ""
+                    : "s"
             }`;
     }
 }
-
 
 imposterBackBtn?.addEventListener(
     "click",
@@ -1091,7 +1113,6 @@ imposterBackBtn?.addEventListener(
         );
     }
 );
-
 
 imposterContinueBtn?.addEventListener(
     "click",
@@ -1141,7 +1162,6 @@ function resetDare() {
     updateStartRound();
 }
 
-
 dareYesBtn?.addEventListener(
     "click",
     () => {
@@ -1169,7 +1189,6 @@ dareYesBtn?.addEventListener(
         updateStartRound();
     }
 );
-
 
 dareNoBtn?.addEventListener(
     "click",
@@ -1206,7 +1225,6 @@ dareNoBtn?.addEventListener(
     }
 );
 
-
 dareInput?.addEventListener(
     "input",
     () => {
@@ -1218,19 +1236,22 @@ dareInput?.addEventListener(
     }
 );
 
-
 function updateStartRound() {
 
     if (!startRoundBtn) return;
 
-    startRoundBtn.disabled =
-        dareEnabled === null ||
+    const valid =
+        dareEnabled !== null &&
         (
-            dareEnabled &&
-            !dareInput?.value.trim()
+            !dareEnabled ||
+            Boolean(
+                dareInput?.value.trim()
+            )
         );
-}
 
+    startRoundBtn.disabled =
+        !valid;
+}
 
 dareBackBtn?.addEventListener(
     "click",
@@ -1279,16 +1300,17 @@ startRoundBtn?.addEventListener(
                 : "";
 
         if (!prepareRound()) {
+
             return;
         }
 
         currentRevealIndex = 0;
 
-        showPlayerIdentity();
-
         showScreen(
             screens.reveal
         );
+
+        showPlayerIdentity();
     }
 );
 
@@ -1300,8 +1322,8 @@ function prepareRound() {
 
     const words =
         selectedCategories.flatMap(
-            c =>
-                c.words || []
+            category =>
+                category.words || []
         );
 
     if (!words.length) {
@@ -1341,39 +1363,44 @@ function prepareRound() {
 
     dareAssignedPlayers = [];
 
+    finalDarePlayers = [];
+
     return true;
 }
 
+/* =========================================================
+   CHOOSE IMPOSTERS
+========================================================= */
 
 function chooseImposters() {
 
     const indexes =
         shuffle(
             players.map(
-                (_, i) => i
+                (_, index) => index
             )
         );
 
     const fresh =
         indexes.filter(
-            i =>
+            index =>
                 !recentImposters.includes(
-                    i
+                    index
                 )
         );
 
-    const old =
+    const previous =
         indexes.filter(
-            i =>
+            index =>
                 recentImposters.includes(
-                    i
+                    index
                 )
         );
 
     const chosen =
         [
             ...fresh,
-            ...old
+            ...previous
         ].slice(
             0,
             imposterCount
@@ -1386,7 +1413,7 @@ function chooseImposters() {
 }
 
 /* =========================================================
-   COMBINED PASS PHONE + PLAYER REVEAL
+   PRIVATE PLAYER REVEAL
 ========================================================= */
 
 function showPlayerIdentity() {
@@ -1397,9 +1424,7 @@ function showPlayerIdentity() {
     if (!card) return;
 
     const player =
-        players[
-            currentRevealIndex
-        ];
+        players[currentRevealIndex];
 
     const progress =
         (
@@ -1474,11 +1499,9 @@ function showCurrentSecret() {
     if (!card) return;
 
     const player =
-        players[
-            currentRevealIndex
-        ];
+        players[currentRevealIndex];
 
-    const imposter =
+    const isImposter =
         imposters.includes(
             currentRevealIndex
         );
@@ -1486,7 +1509,7 @@ function showCurrentSecret() {
     card.className =
         "reveal-card";
 
-    if (imposter) {
+    if (isImposter) {
 
         card.classList.add(
             "danger"
@@ -1595,7 +1618,7 @@ function showCurrentSecret() {
 }
 
 /* =========================================================
-   FINISH PLAYER REVEAL
+   FINISH REVEAL
 ========================================================= */
 
 function finishReveal() {
@@ -1619,15 +1642,11 @@ function finishReveal() {
     );
 }
 
-/* =========================================================
-   OLD PASS SCREEN DISABLED
-========================================================= */
-
 nextRevealBtn?.addEventListener(
     "click",
-    e => {
+    event => {
 
-        e.preventDefault();
+        event.preventDefault();
 
         showPlayerIdentity();
 
@@ -1638,7 +1657,7 @@ nextRevealBtn?.addEventListener(
 );
 
 /* =========================================================
-   DISCUSSION + SPIN WHEEL
+   DISCUSSION
 ========================================================= */
 
 function showDiscussion() {
@@ -1677,6 +1696,9 @@ function showDiscussion() {
     );
 }
 
+/* =========================================================
+   RANDOM SPEAKER WHEEL
+========================================================= */
 
 pickRandomPlayerBtn?.addEventListener(
     "click",
@@ -1709,14 +1731,20 @@ pickRandomPlayerBtn?.addEventListener(
                 Math.random() * 12
             );
 
+        const finalPlayer =
+            randomItem(players);
+
         const interval =
             setInterval(
                 () => {
 
+                    const previewIndex =
+                        step %
+                        players.length;
+
                     const preview =
                         players[
-                            step %
-                            players.length
+                            previewIndex
                         ];
 
                     if (box) {
@@ -1744,9 +1772,7 @@ pickRandomPlayerBtn?.addEventListener(
                         );
 
                         randomSpeakingPlayer =
-                            randomItem(
-                                players
-                            );
+                            finalPlayer;
 
                         if (box) {
 
@@ -1757,7 +1783,7 @@ pickRandomPlayerBtn?.addEventListener(
 
                                 <strong>
                                     ${esc(
-                                        randomSpeakingPlayer
+                                        finalPlayer
                                     )}
                                 </strong>
 
@@ -1821,7 +1847,7 @@ function renderVoting() {
     list.innerHTML = "";
 
     players.forEach(
-        (player, i) => {
+        (player, index) => {
 
             const button =
                 document.createElement(
@@ -1834,7 +1860,9 @@ function renderVoting() {
                 "vote-card";
 
             const selected =
-                selectedVotes.includes(i);
+                selectedVotes.includes(
+                    index
+                );
 
             if (selected) {
 
@@ -1846,7 +1874,8 @@ function renderVoting() {
             button.innerHTML = `
                 <span class="avatar">
                     ${esc(
-                        player[0].toUpperCase()
+                        player.charAt(0)
+                            .toUpperCase()
                     )}
                 </span>
 
@@ -1867,30 +1896,27 @@ function renderVoting() {
                 "click",
                 () => {
 
-                    toggleVote(i);
+                    toggleVote(index);
                 }
             );
 
-            list.appendChild(
-                button
-            );
+            list.appendChild(button);
         }
     );
 
     updateVoteCounter();
 }
 
-
-function toggleVote(i) {
+function toggleVote(index) {
 
     if (
-        selectedVotes.includes(i)
+        selectedVotes.includes(index)
     ) {
 
         selectedVotes =
             selectedVotes.filter(
-                v =>
-                    v !== i
+                value =>
+                    value !== index
             );
 
     } else {
@@ -1903,12 +1929,11 @@ function toggleVote(i) {
             return;
         }
 
-        selectedVotes.push(i);
+        selectedVotes.push(index);
     }
 
     renderVoting();
 }
-
 
 function updateVoteCounter() {
 
@@ -1942,6 +1967,9 @@ function updateVoteCounter() {
     }
 }
 
+/* =========================================================
+   SUBMIT VOTE
+========================================================= */
 
 submitVoteBtn?.addEventListener(
     "click",
@@ -2089,7 +2117,6 @@ function renderVoteReveal() {
     );
 }
 
-
 function nextVoteReveal() {
 
     if (
@@ -2123,20 +2150,54 @@ function calculateResult() {
                 imposters.includes(i)
         ).length;
 
+    const caughtImposters =
+        imposters.filter(
+            index =>
+                selectedVotes.includes(index)
+        );
+
+    const escapedImposters =
+        imposters.filter(
+            index =>
+                !selectedVotes.includes(index)
+        );
+
     result = {
 
         caught,
+
+        escaped:
+            escapedImposters.length,
+
+        caughtImposters,
+
+        escapedImposters,
 
         allCaught:
             caught ===
             imposters.length
     };
 
+    /*
+       IMPORTANT:
+       At this stage ONLY caught imposters
+       are guaranteed to do the dare.
+
+       Escaped imposters will add civilians
+       later when they select them.
+    */
+
+    finalDarePlayers =
+        [...caughtImposters];
+
+    dareAssignedPlayers = [];
+
     renderResult();
 }
 
-
 function renderResult() {
+
+    if (!result) return;
 
     const {
         caught,
@@ -2207,6 +2268,9 @@ function renderResult() {
     renderDareResult();
 }
 
+/* =========================================================
+   ACTUAL IMPOSTERS
+========================================================= */
 
 function renderActualImposters() {
 
@@ -2258,41 +2322,72 @@ function renderActualImposters() {
                 }
             `;
 
-            list.appendChild(
-                div
-            );
+            list.appendChild(div);
         }
     );
 }
 
 /* =========================================================
-   DARE RESULT
+   DARE RESULT — MASTER LOGIC
 ========================================================= */
 
 function renderDareResult() {
 
-    const box =
+    const dareBox =
         $("dareResult");
 
-    const assignment =
+    const assignmentBox =
         $("dareAssignment");
 
-    if (!box) return;
+    const civilianList =
+        $("civilianList");
+
+    const assignmentMessage =
+        $("assignedDareMessage");
+
+    if (!dareBox) return;
+
+    /* =====================================================
+       NO DARE
+    ===================================================== */
 
     if (!dareText) {
 
-        box.classList.add(
+        dareBox.classList.add(
             "hidden"
         );
 
-        assignment?.classList.add(
-            "hidden"
-        );
+        if (assignmentBox) {
+
+            assignmentBox.classList.add(
+                "hidden"
+            );
+        }
+
+        if (civilianList) {
+
+            civilianList.innerHTML =
+                "";
+        }
+
+        if (assignmentMessage) {
+
+            assignmentMessage.innerHTML =
+                "";
+
+            assignmentMessage.classList.add(
+                "hidden"
+            );
+        }
 
         return;
     }
 
-    box.classList.remove(
+    /* =====================================================
+       SHOW DARE
+    ===================================================== */
+
+    dareBox.classList.remove(
         "hidden"
     );
 
@@ -2300,7 +2395,7 @@ function renderDareResult() {
 
         $("dareResultMessage").textContent =
             result.allCaught
-                ? "The caught imposter must do this dare:"
+                ? "The caught imposters must do this dare:"
                 : "The escaped imposters must each select a civilian to do this dare:";
     }
 
@@ -2310,148 +2405,257 @@ function renderDareResult() {
             dareText;
     }
 
-    if (result.allCaught) {
+    /* =====================================================
+       GET CAUGHT + ESCAPED
+    ===================================================== */
+
+    const caughtImposters =
+        imposters.filter(
+            index =>
+                selectedVotes.includes(index)
+        );
+
+    const escapedImposters =
+        imposters.filter(
+            index =>
+                !selectedVotes.includes(index)
+        );
+
+    /*
+       Rebuild final dare list.
+
+       Caught imposters ALWAYS belong in it.
+    */
+
+    finalDarePlayers =
+        [...caughtImposters];
+
+    /*
+       No escaped imposters:
+       only caught imposters do dare.
+    */
+
+    if (
+        escapedImposters.length === 0
+    ) {
 
         dareAssignedPlayers = [];
 
-        const caughtImposter =
-            getCaughtImposter();
+        if (assignmentBox) {
 
-        if (
-            caughtImposter !== null &&
-            caughtImposter !== undefined
-        ) {
-
-            dareAssignedPlayers.push(
-                caughtImposter
+            assignmentBox.classList.add(
+                "hidden"
             );
         }
 
-        assignment?.classList.add(
-            "hidden"
-        );
+        if (civilianList) {
 
-    } else {
+            civilianList.innerHTML =
+                "";
+        }
 
-        showCivilianAssignment();
-    }
-}
-
-
-function getCaughtImposter() {
-
-    const caught =
-        imposters.filter(
-            i =>
-                selectedVotes.includes(i)
-        );
-
-    return randomItem(
-        caught
-    );
-}
-
-/* =========================================================
-   CIVILIAN DARE
-========================================================= */
-
-function showCivilianAssignment() {
-
-    const assignment =
-        $("dareAssignment");
-
-    const list =
-        $("civilianList");
-
-    const message =
-        $("assignedDareMessage");
-
-    if (
-        !assignment ||
-        !list
-    ) {
+        renderFinalDarePlayers();
 
         return;
     }
 
-    assignment.classList.remove(
-        "hidden"
-    );
-
-    list.innerHTML = "";
-
-    message?.classList.add(
-        "hidden"
-    );
-
-    dareAssignedPlayers = [];
-
     /*
-       IMPORTANT:
-       Only ESCAPED imposters count.
-
-       Example:
-
-       2 total imposters
-       2 escaped
-       -> 2 civilians required
-
-       2 total imposters
-       1 escaped
-       -> 1 civilian required
+       Escaped imposters exist.
+       They must select civilians.
     */
 
-    const escapedImposters =
-        imposters.filter(
-            i =>
-                !selectedVotes.includes(i)
-        );
+    showCivilianAssignmentFixed(
+        escapedImposters
+    );
+}
 
-    const requiredSelections =
+/* =========================================================
+   ESCAPED IMPOSTER → CIVILIAN SELECTION
+========================================================= */
+
+function showCivilianAssignmentFixed(
+    escapedImposters
+) {
+
+    const assignmentBox =
+        $("dareAssignment");
+
+    const civilianList =
+        $("civilianList");
+
+    const assignmentMessage =
+        $("assignedDareMessage");
+
+    if (
+        !assignmentBox ||
+        !civilianList
+    ) {
+
+        /*
+           Even if the optional assignment
+           container is missing, still show
+           caught imposters in final list.
+        */
+
+        finalDarePlayers =
+            imposters.filter(
+                index =>
+                    selectedVotes.includes(index)
+            );
+
+        renderFinalDarePlayers();
+
+        return;
+    }
+
+    assignmentBox.classList.remove(
+        "hidden"
+    );
+
+    civilianList.innerHTML = "";
+
+    /*
+       DO NOT reset dareAssignedPlayers
+       if selections already exist.
+
+       This prevents the final selection
+       from disappearing.
+    */
+
+    if (!Array.isArray(dareAssignedPlayers)) {
+
+        dareAssignedPlayers = [];
+    }
+
+    const required =
         escapedImposters.length;
 
-    const civilians =
-        shuffle(
-            players
-                .map(
-                    (_, i) => i
-                )
-                .filter(
-                    i =>
-                        !imposters.includes(
-                            i
-                        )
-                )
+    /* =====================================================
+       MESSAGE
+    ===================================================== */
+
+    if (assignmentMessage) {
+
+        assignmentMessage.classList.remove(
+            "hidden"
         );
 
+        const selected =
+            dareAssignedPlayers.length;
+
+        if (selected < required) {
+
+            assignmentMessage.innerHTML = `
+                😈
+                <strong>
+                    ${required}
+                </strong>
+                escaped imposter${
+                    required === 1
+                        ? ""
+                        : "s"
+                }
+                ${
+                    selected > 0
+                        ? ` — ${selected}/${required} civilians selected`
+                        : " must each choose a civilian"
+                }.
+            `;
+
+        } else {
+
+            assignmentMessage.innerHTML = `
+                🎯
+                All required civilians have been selected!
+            `;
+        }
+    }
+
+    /* =====================================================
+       CIVILIANS
+    ===================================================== */
+
+    const civilians =
+        players
+            .map(
+                (_, index) =>
+                    index
+            )
+            .filter(
+                index =>
+                    !imposters.includes(
+                        index
+                    )
+            );
+
+    /* =====================================================
+       IF ALL ALREADY SELECTED
+    ===================================================== */
+
+    if (
+        dareAssignedPlayers.length >=
+        required
+    ) {
+
+        renderFinalDarePlayers();
+
+        showCompletedDareAssignment();
+
+        return;
+    }
+
+    /* =====================================================
+       DISPLAY CIVILIANS
+    ===================================================== */
+
     civilians.forEach(
-        i => {
+        index => {
 
             const button =
                 document.createElement(
                     "button"
                 );
 
-            button.type =
-                "button";
+            button.type = "button";
 
             button.className =
                 "vote-card";
 
+            button.dataset.playerIndex =
+                String(index);
+
+            const alreadySelected =
+                dareAssignedPlayers.includes(
+                    index
+                );
+
+            if (alreadySelected) {
+
+                button.classList.add(
+                    "selected"
+                );
+
+                button.disabled = true;
+            }
+
             button.innerHTML = `
                 <span class="avatar">
                     ${esc(
-                        players[i][0]
+                        players[index][0]
                             .toUpperCase()
                     )}
                 </span>
 
                 <span>
-                    ${esc(players[i])}
+                    ${esc(players[index])}
                 </span>
 
                 <span>
-                    🎯
+                    ${
+                        alreadySelected
+                            ? "✓"
+                            : "🎯"
+                    }
                 </span>
             `;
 
@@ -2459,105 +2663,90 @@ function showCivilianAssignment() {
                 "click",
                 () => {
 
-                    assignDare(
-                        i,
+                    selectDareCivilian(
+                        index,
                         button,
-                        requiredSelections
+                        required
                     );
                 }
             );
 
-            list.appendChild(
+            civilianList.appendChild(
                 button
             );
         }
     );
-
-    if (message) {
-
-        message.classList.remove(
-            "hidden"
-        );
-
-        message.innerHTML = `
-            🎯 Select
-            <strong>
-                ${requiredSelections}
-            </strong>
-            civilian${
-                requiredSelections > 1
-                    ? "s"
-                    : ""
-            }
-            for the dare.
-        `;
-    }
 }
 
+/* =========================================================
+   SELECT CIVILIAN
+========================================================= */
 
-function assignDare(
-    i,
+function selectDareCivilian(
+    playerIndex,
     button,
-    requiredSelections
+    required
 ) {
 
-    const list =
-        $("civilianList");
-
-    const message =
-        $("assignedDareMessage");
-
-    /*
-       Safety check:
-       An imposter can never receive this
-       civilian dare.
-    */
+    /* =====================================================
+       NEVER ALLOW IMPOSTER
+    ===================================================== */
 
     if (
-        imposters.includes(i)
-    ) {
-
-        alert(
-            "An imposter cannot be selected. Choose a civilian."
-        );
-
-        return;
-    }
-
-    /*
-       Prevent the same civilian from
-       being selected twice.
-    */
-
-    if (
-        dareAssignedPlayers.includes(i)
+        imposters.includes(
+            playerIndex
+        )
     ) {
 
         return;
     }
 
-    /*
-       Prevent selecting more civilians
-       than the number of escaped imposters.
-    */
+    /* =====================================================
+       NO DUPLICATES
+    ===================================================== */
+
+    if (
+        dareAssignedPlayers.includes(
+            playerIndex
+        )
+    ) {
+
+        return;
+    }
+
+    /* =====================================================
+       MAX LIMIT
+    ===================================================== */
 
     if (
         dareAssignedPlayers.length >=
-        requiredSelections
+        required
     ) {
 
         return;
     }
 
+    /* =====================================================
+       SAVE CIVILIAN
+    ===================================================== */
+
+    dareAssignedPlayers.push(
+        playerIndex
+    );
+
     /*
-       Add selected civilian.
+       IMPORTANT:
+       Add the civilian to the MASTER
+       final dare list.
+
+       Caught imposters were already added.
     */
 
-    dareAssignedPlayers.push(i);
+    rebuildFinalDarePlayers();
 
-    /*
-       Mark selected button.
-    */
+    /* =====================================================
+       UPDATE BUTTON
+    ===================================================== */
 
     if (button) {
 
@@ -2565,16 +2754,18 @@ function assignDare(
             "selected"
         );
 
+        button.disabled = true;
+
         button.innerHTML = `
             <span class="avatar">
                 ${esc(
-                    players[i][0]
+                    players[playerIndex][0]
                         .toUpperCase()
                 )}
             </span>
 
             <span>
-                ${esc(players[i])}
+                ${esc(players[playerIndex])}
             </span>
 
             <span>
@@ -2583,85 +2774,262 @@ function assignDare(
         `;
     }
 
-    /*
-       Update progress.
-    */
+    /* =====================================================
+       UPDATE COUNTER
+    ===================================================== */
 
-    if (message) {
+    const selected =
+        dareAssignedPlayers.length;
 
-        message.classList.remove(
-            "hidden"
-        );
-
-        message.innerHTML = `
-            🎯
-            <strong>
-                ${dareAssignedPlayers.length}
-                / ${requiredSelections}
-            </strong>
-            civilians selected.
-        `;
-    }
-
-    /*
-       All required civilians selected.
-    */
+    const assignmentMessage =
+        $("assignedDareMessage");
 
     if (
-        dareAssignedPlayers.length ===
-        requiredSelections
+        selected < required
     ) {
 
-        const selectedNames =
-            dareAssignedPlayers
-                .map(
-                    i =>
-                        esc(
-                            players[i]
-                        )
-                )
-                .join(", ");
+        if (assignmentMessage) {
 
-        const verb =
-            requiredSelections > 1
-                ? "have been chosen"
-                : "has been chosen";
-
-        if (list) {
-
-            list.innerHTML = `
-                <div class="assigned-dare-message">
-                    🎯
-
-                    <strong>
-                        ${selectedNames}
-                    </strong>
-
-                    must do the dare!
-                </div>
-            `;
-        }
-
-        if (message) {
-
-            message.classList.remove(
+            assignmentMessage.classList.remove(
                 "hidden"
             );
 
-            message.innerHTML = `
+            assignmentMessage.innerHTML = `
                 🎯
-
                 <strong>
-                    ${selectedNames}
+                    ${selected} / ${required}
                 </strong>
-
-                ${verb}
-                for the dare!
+                civilians selected.
             `;
         }
+
+        /*
+           CRITICAL:
+           Render the current master list
+           immediately.
+
+           This means if 1 civilian is selected
+           and another still needs to be selected,
+           caught imposters + selected civilian
+           are already visible.
+        */
+
+        renderFinalDarePlayers();
+
+        return;
     }
+
+    /* =====================================================
+       ALL REQUIRED CIVILIANS SELECTED
+    ===================================================== */
+
+    rebuildFinalDarePlayers();
+
+    showCompletedDareAssignment();
+
+    renderFinalDarePlayers();
 }
 
+/* =========================================================
+   REBUILD MASTER DARE LIST
+========================================================= */
+
+function rebuildFinalDarePlayers() {
+
+    const caughtImposters =
+        imposters.filter(
+            index =>
+                selectedVotes.includes(index)
+        );
+
+    /*
+       Remove duplicates while preserving
+       the order:
+       caught imposters first,
+       civilians second.
+    */
+
+    finalDarePlayers =
+        [
+            ...new Set(
+                [
+                    ...caughtImposters,
+                    ...dareAssignedPlayers
+                ]
+            )
+        ];
+}
+
+/* =========================================================
+   RENDER EVERYONE WHO MUST DO DARE
+========================================================= */
+
+function renderFinalDarePlayers() {
+
+    /*
+       Always rebuild before rendering.
+    */
+
+    rebuildFinalDarePlayers();
+
+    /*
+       Find possible containers.
+
+       The first is your existing actual
+       imposters list.
+
+       The second is an optional dedicated
+       final dare list if your HTML has one.
+    */
+
+    const dedicatedList =
+        $("finalDarePlayersList");
+
+    /*
+       If the HTML has a dedicated final
+       list, use it.
+    */
+
+    if (dedicatedList) {
+
+        dedicatedList.innerHTML = "";
+
+        finalDarePlayers.forEach(
+            index => {
+
+                const div =
+                    document.createElement(
+                        "div"
+                    );
+
+                div.className =
+                    "final-player dare-final-player";
+
+                div.innerHTML = `
+                    <span class="avatar">
+                        ${esc(
+                            players[index][0]
+                                .toUpperCase()
+                        )}
+                    </span>
+
+                    <span class="final-player-name">
+                        ${esc(players[index])}
+                    </span>
+
+                    <span class="correct-mark">
+                        MUST DO DARE 🎯
+                    </span>
+                `;
+
+                dedicatedList.appendChild(
+                    div
+                );
+            }
+        );
+    }
+
+    /*
+       Also update the main assignment
+       message so the user can ALWAYS see
+       the complete list.
+    */
+
+    const assignmentMessage =
+        $("assignedDareMessage");
+
+    if (!assignmentMessage) return;
+
+    if (!finalDarePlayers.length) {
+
+        assignmentMessage.classList.add(
+            "hidden"
+        );
+
+        return;
+    }
+
+    const names =
+        finalDarePlayers
+            .map(
+                index =>
+                    esc(players[index])
+            )
+            .join(", ");
+
+    assignmentMessage.classList.remove(
+        "hidden"
+    );
+
+    assignmentMessage.innerHTML = `
+        <div>
+            🎯
+        </div>
+
+        <div>
+            <strong>
+                ${names}
+            </strong>
+        </div>
+
+        <div>
+            must do the dare!
+        </div>
+    `;
+}
+/* =========================================================
+   FINAL ASSIGNMENT MESSAGE
+========================================================= */
+
+function showCompletedDareAssignment() {
+
+    rebuildFinalDarePlayers();
+
+    const assignmentMessage =
+        $("assignedDareMessage");
+
+    if (!assignmentMessage) return;
+
+    const names =
+        finalDarePlayers
+            .map(
+                index =>
+                    esc(players[index])
+            )
+            .join(", ");
+
+    assignmentMessage.classList.remove(
+        "hidden"
+    );
+
+    assignmentMessage.innerHTML = `
+        <div>
+            🎯
+        </div>
+
+        <strong>
+            ${names}
+        </strong>
+
+        <div>
+            must do the dare!
+        </div>
+    `;
+
+    /*
+       IMPORTANT:
+       Do NOT put another message inside
+       civilianList. The final message above
+       is the ONLY dare-selection message.
+    */
+
+    const civilianList =
+        $("civilianList");
+
+    if (civilianList) {
+        civilianList.innerHTML = "";
+    }
+}
 /* =========================================================
    PLAY AGAIN
 ========================================================= */
@@ -2685,6 +3053,8 @@ playAgainBtn?.addEventListener(
         randomSpeakingPlayer = null;
 
         dareAssignedPlayers = [];
+
+        finalDarePlayers = [];
 
         resetDare();
 
@@ -2734,6 +3104,8 @@ newPlayersBtn?.addEventListener(
 
         dareAssignedPlayers = [];
 
+        finalDarePlayers = [];
+
         wheelSpinning = false;
 
         resetDare();
@@ -2751,7 +3123,7 @@ newPlayersBtn?.addEventListener(
 );
 
 /* =========================================================
-   INITIALIZE
+   INITIALIZE GAME
 ========================================================= */
 
 function initializeGame() {
@@ -2786,6 +3158,8 @@ function initializeGame() {
 
     dareAssignedPlayers = [];
 
+    finalDarePlayers = [];
+
     wheelSpinning = false;
 
     renderPlayers();
@@ -2800,5 +3174,9 @@ function initializeGame() {
         screens.home
     );
 }
+
+/* =========================================================
+   START
+========================================================= */
 
 initializeGame();
