@@ -1,100 +1,56 @@
 /* =========================================================
-   IMPOSTER FUN — COMPLETE UPDATED SCRIPT
-   Compatible with the HTML supplied by Thangaraj Thevar
+   IMPOSTER FUN — FULL GAME LOGIC
+   Updated:
+   1. Combined PASS PHONE + YOU ARE screen
+   2. Random speaker spin wheel
+   3. Prevent inactive screens from scrolling
 ========================================================= */
 
 "use strict";
 
 /* =========================================================
-   CATEGORIES
+   CATEGORY DATA
 ========================================================= */
 
 const categories = [
     {
-        name: "Food",
-        icon: "🍕",
-        words: [
-            "Pizza","Burger","Sushi","Biryani","Dosa","Pasta",
-            "Tacos","Ice Cream","Noodles","Sandwich","Momos","Fried Rice"
-        ]
+        name: "Food", icon: "🍕",
+        words: ["Pizza","Burger","Sushi","Biryani","Dosa","Pasta","Tacos","Ice Cream","Noodles","Sandwich","Momos","Fried Rice"]
     },
     {
-        name: "Movies",
-        icon: "🎬",
-        words: [
-            "Avatar","Titanic","Inception","Interstellar","Dangal",
-            "Joker","Frozen","The Matrix","Avengers","Harry Potter",
-            "Jurassic Park","The Lion King"
-        ]
+        name: "Movies", icon: "🎬",
+        words: ["Avatar","Titanic","Inception","Interstellar","Dangal","Joker","Frozen","The Matrix","Avengers","Harry Potter","Jurassic Park","The Lion King"]
     },
     {
-        name: "South Indian Movies",
-        icon: "🎥",
-        words: [
-            "Baahubali","RRR","KGF","Pushpa","Kantara","Leo",
-            "Vikram","Jailer","Master","Drishyam","Eega","Lucifer",
-            "Premam","Kumbalangi Nights","Aavesham","Manjummel Boys",
-            "Arjun Reddy","Jersey","Rangasthalam","Dasara"
-        ]
+        name: "South Indian Movies", icon: "🎥",
+        words: ["Baahubali","RRR","KGF","Pushpa","Kantara","Leo","Vikram","Jailer","Master","Drishyam","Eega","Lucifer","Premam","Kumbalangi Nights","Aavesham","Manjummel Boys","Arjun Reddy","Jersey","Rangasthalam","Dasara"]
     },
     {
-        name: "IPL Teams",
-        icon: "🏏",
-        words: [
-            "Chennai Super Kings","Mumbai Indians",
-            "Royal Challengers Bengaluru","Kolkata Knight Riders",
-            "Rajasthan Royals","Sunrisers Hyderabad","Delhi Capitals",
-            "Punjab Kings","Lucknow Super Giants","Gujarat Titans"
-        ]
+        name: "IPL Teams", icon: "🏏",
+        words: ["Chennai Super Kings","Mumbai Indians","Royal Challengers Bengaluru","Kolkata Knight Riders","Rajasthan Royals","Sunrisers Hyderabad","Delhi Capitals","Punjab Kings","Lucknow Super Giants","Gujarat Titans"]
     },
     {
-        name: "Indian Food",
-        icon: "🍛",
-        words: [
-            "Butter Chicken","Biryani","Pav Bhaji","Chole Bhature",
-            "Masala Dosa","Idli","Vada","Samosa","Pani Puri",
-            "Rajma Chawal","Palak Paneer","Dal Makhani","Pongal",
-            "Parotta","Chicken 65","Fish Curry","Gulab Jamun",
-            "Jalebi","Rasgulla","Kheer"
-        ]
+        name: "Indian Food", icon: "🍛",
+        words: ["Butter Chicken","Biryani","Pav Bhaji","Chole Bhature","Masala Dosa","Idli","Vada","Samosa","Pani Puri","Rajma Chawal","Palak Paneer","Dal Makhani","Pongal","Parotta","Chicken 65","Fish Curry","Gulab Jamun","Jalebi","Rasgulla","Kheer"]
     },
     {
-        name: "Places",
-        icon: "🌍",
-        words: [
-            "Beach","Airport","School","Hospital","Mall","Temple",
-            "Mountain","Cinema","Restaurant","Hotel","Park",
-            "Railway Station"
-        ]
+        name: "Places", icon: "🌍",
+        words: ["Beach","Airport","School","Hospital","Mall","Temple","Mountain","Cinema","Restaurant","Hotel","Park","Railway Station"]
     },
     {
-        name: "Animals",
-        icon: "🐯",
-        words: [
-            "Tiger","Lion","Elephant","Dog","Cat","Monkey",
-            "Giraffe","Penguin","Dolphin","Horse","Rabbit","Crocodile"
-        ]
+        name: "Animals", icon: "🐯",
+        words: ["Tiger","Lion","Elephant","Dog","Cat","Monkey","Giraffe","Penguin","Dolphin","Horse","Rabbit","Crocodile"]
     },
     {
-        name: "Sports",
-        icon: "⚽",
-        words: [
-            "Cricket","Football","Tennis","Basketball","Badminton",
-            "Hockey","Boxing","Swimming","Golf","Volleyball",
-            "Kabaddi","Wrestling"
-        ]
+        name: "Sports", icon: "⚽",
+        words: ["Cricket","Football","Tennis","Basketball","Badminton","Hockey","Boxing","Swimming","Golf","Volleyball","Kabaddi","Wrestling"]
     },
     {
-        name: "Everyday",
-        icon: "🏠",
-        words: [
-            "Phone","Laptop","Bed","Chair","Mirror","Toothbrush",
-            "Umbrella","Backpack","Clock","Shoes","Television","Keys"
-        ]
+        name: "Everyday", icon: "🏠",
+        words: ["Phone","Laptop","Bed","Chair","Mirror","Toothbrush","Umbrella","Backpack","Clock","Shoes","Television","Keys"]
     },
     {
-        name: "Random",
-        icon: "🎲",
+        name: "Random", icon: "🎲",
         words: []
     }
 ];
@@ -104,127 +60,165 @@ const categories = [
 ========================================================= */
 
 let players = [];
-
-let selectedCategory = null;
-let selectedCategoryIndex = null;
+let selectedCategories = [];
 let customCategory = null;
 
 let imposterCount = 1;
-
 let dareEnabled = null;
 let dareText = "";
 
 let secretWord = "";
-
 let imposters = [];
 let recentImposters = [];
 
 let currentRevealIndex = 0;
-let secretShown = false;
-
 let selectedVotes = [];
 let voteRevealIndex = 0;
 
 let result = null;
+let randomSpeakingPlayer = null;
+let dareAssignedPlayer = null;
+
+let wheelSpinning = false;
 
 /* =========================================================
-   DOM REFERENCES
+   DOM
 ========================================================= */
 
+const $ = id => document.getElementById(id);
+
 const screens = {
-    home: document.getElementById("homeScreen"),
-    players: document.getElementById("playersScreen"),
-    category: document.getElementById("categoryScreen"),
-    imposter: document.getElementById("imposterScreen"),
-    dare: document.getElementById("dareScreen"),
-    ready: document.getElementById("readyScreen"),
-    reveal: document.getElementById("revealScreen"),
-    pass: document.getElementById("passScreen"),
-    discussion: document.getElementById("discussionScreen"),
-    voting: document.getElementById("votingScreen"),
-    voteReveal: document.getElementById("voteRevealScreen"),
-    result: document.getElementById("resultScreen")
+    home: $("homeScreen"),
+    players: $("playersScreen"),
+    category: $("categoryScreen"),
+    imposter: $("imposterScreen"),
+    dare: $("dareScreen"),
+    ready: $("readyScreen"),
+    reveal: $("revealScreen"),
+    pass: $("passScreen"),
+    discussion: $("discussionScreen"),
+    voting: $("votingScreen"),
+    voteReveal: $("voteRevealScreen"),
+    result: $("resultScreen")
 };
 
-const startGameBtn = document.getElementById("startGameBtn");
+const startGameBtn = $("startGameBtn");
 
-const playerNameInput = document.getElementById("playerNameInput");
-const addPlayerBtn = document.getElementById("addPlayerBtn");
-const playersList = document.getElementById("playersList");
-const playerCountText = document.getElementById("playerCountText");
-const playersContinueBtn = document.getElementById("playersContinueBtn");
+const playerNameInput = $("playerNameInput");
+const addPlayerBtn = $("addPlayerBtn");
+const playersList = $("playersList");
+const playerCountText = $("playerCountText");
+const playersContinueBtn = $("playersContinueBtn");
+const playersBackBtn = $("playersBackBtn");
 
-const categoryGrid = document.getElementById("categoryGrid");
-const categoryContinueBtn = document.getElementById("categoryContinueBtn");
-const categoryStatus = document.getElementById("categoryStatus");
-const customCategoryBtn = document.getElementById("customCategoryBtn");
-const customCategoryForm = document.getElementById("customCategoryForm");
-const customCategoryName = document.getElementById("customCategoryName");
-const customCategoryWords = document.getElementById("customCategoryWords");
+const categoryGrid = $("categoryGrid");
+const categoryContinueBtn = $("categoryContinueBtn");
+const categoryStatus = $("categoryStatus");
+const categoryBackBtn = $("categoryBackBtn");
 
-const imposterContinueBtn = document.getElementById("imposterContinueBtn");
-const imposterBackBtn = document.getElementById("imposterBackBtn");
-const imposterLimitText = document.getElementById("imposterLimitText");
+const customCategoryBtn = $("customCategoryBtn");
+const customCategoryForm = $("customCategoryForm");
+const customCategoryName = $("customCategoryName");
+const customCategoryWords = $("customCategoryWords");
 
-const dareYesBtn = document.getElementById("dareYesBtn");
-const dareNoBtn = document.getElementById("dareNoBtn");
-const dareInputContainer = document.getElementById("dareInputContainer");
-const dareInput = document.getElementById("dareInput");
-const dareStatus = document.getElementById("dareStatus");
-const startRoundBtn = document.getElementById("startRoundBtn");
-const dareBackBtn = document.getElementById("dareBackBtn");
+const imposterContinueBtn = $("imposterContinueBtn");
+const imposterBackBtn = $("imposterBackBtn");
+const imposterLimitText = $("imposterLimitText");
 
-const nextRevealBtn = document.getElementById("nextRevealBtn");
-const goVotingBtn = document.getElementById("goVotingBtn");
+const dareYesBtn = $("dareYesBtn");
+const dareNoBtn = $("dareNoBtn");
+const dareInputContainer = $("dareInputContainer");
+const dareInput = $("dareInput");
+const dareStatus = $("dareStatus");
+const startRoundBtn = $("startRoundBtn");
+const dareBackBtn = $("dareBackBtn");
 
-const submitVoteBtn = document.getElementById("submitVoteBtn");
-
-const playAgainBtn = document.getElementById("playAgainBtn");
-const newPlayersBtn = document.getElementById("newPlayersBtn");
+const nextRevealBtn = $("nextRevealBtn");
+const goVotingBtn = $("goVotingBtn");
+const submitVoteBtn = $("submitVoteBtn");
+const playAgainBtn = $("playAgainBtn");
+const newPlayersBtn = $("newPlayersBtn");
+const pickRandomPlayerBtn = $("pickRandomPlayerBtn");
 
 /* =========================================================
-   SCREEN NAVIGATION
+   SCREEN CONTROL
 ========================================================= */
 
 function showScreen(screen) {
-    Object.values(screens).forEach(element => {
-        if (element) {
-            element.classList.remove("active");
-        }
+    Object.values(screens).forEach(s => {
+        if (!s) return;
+
+        s.classList.remove("active");
+        s.setAttribute("aria-hidden", "true");
     });
 
     if (screen) {
         screen.classList.add("active");
+        screen.setAttribute("aria-hidden", "false");
     }
 
-    window.scrollTo({
-        top: 0,
-        behavior: "smooth"
-    });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+    window.scrollTo(0, 0);
+}
+
+/* =========================================================
+   HELPERS
+========================================================= */
+
+const randomItem = arr =>
+    arr?.length
+        ? arr[Math.floor(Math.random() * arr.length)]
+        : null;
+
+function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+
+    return arr;
+}
+
+function esc(value) {
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+function maxImposters() {
+    return Math.max(1, players.length - 1);
+}
+
+function categoryName() {
+    return selectedCategories.map(c => c.name).join(" + ");
 }
 
 /* =========================================================
    HOME
 ========================================================= */
 
-if (startGameBtn) {
-    startGameBtn.addEventListener("click", () => {
-        showScreen(screens.players);
-        renderPlayers();
-    });
-}
+startGameBtn?.addEventListener("click", () => {
+    renderPlayers();
+    showScreen(screens.players);
+
+    setTimeout(() => {
+        playerNameInput?.focus();
+    }, 100);
+});
 
 /* =========================================================
-   PLAYER SETUP
+   PLAYERS
 ========================================================= */
 
 function addPlayer() {
-    if (!playerNameInput) return;
-
-    const name = playerNameInput.value.trim();
+    const name = playerNameInput?.value.trim();
 
     if (!name) {
-        playerNameInput.focus();
+        playerNameInput?.focus();
         return;
     }
 
@@ -235,7 +229,7 @@ function addPlayer() {
 
     if (
         players.some(
-            player => player.toLowerCase() === name.toLowerCase()
+            p => p.toLowerCase() === name.toLowerCase()
         )
     ) {
         alert("That player is already added.");
@@ -251,60 +245,53 @@ function addPlayer() {
     playerNameInput.focus();
 }
 
-if (addPlayerBtn) {
-    addPlayerBtn.addEventListener("click", addPlayer);
-}
+addPlayerBtn?.addEventListener("click", addPlayer);
 
-if (playerNameInput) {
-    playerNameInput.addEventListener("keydown", event => {
-        if (event.key === "Enter") {
-            addPlayer();
-        }
-    });
-}
+playerNameInput?.addEventListener("keydown", e => {
+    if (e.key === "Enter") {
+        e.preventDefault();
+        addPlayer();
+    }
+});
 
 function renderPlayers() {
     if (!playersList) return;
 
     playersList.innerHTML = "";
 
-    players.forEach((player, index) => {
+    players.forEach((name, i) => {
         const card = document.createElement("div");
 
         card.className = "player-card";
 
         card.innerHTML = `
             <div class="avatar">
-                ${escapeHTML(player.charAt(0).toUpperCase())}
+                ${esc(name[0].toUpperCase())}
             </div>
 
-            <span>
-                ${escapeHTML(player)}
-            </span>
+            <span>${esc(name)}</span>
         `;
 
-        const editButton = document.createElement("button");
+        const edit = document.createElement("button");
 
-        editButton.type = "button";
-        editButton.textContent = "EDIT";
+        edit.type = "button";
+        edit.textContent = "EDIT";
 
-        editButton.addEventListener("click", () => {
-            editPlayer(index);
+        edit.addEventListener("click", () => {
+            editPlayer(i);
         });
 
-        const removeButton = document.createElement("button");
+        const remove = document.createElement("button");
 
-        removeButton.type = "button";
-        removeButton.textContent = "×";
-        removeButton.style.fontSize = "20px";
+        remove.type = "button";
+        remove.textContent = "×";
+        remove.style.fontSize = "20px";
 
-        removeButton.addEventListener("click", () => {
-            removePlayer(index);
+        remove.addEventListener("click", () => {
+            removePlayer(i);
         });
 
-        card.appendChild(editButton);
-        card.appendChild(removeButton);
-
+        card.append(edit, remove);
         playersList.appendChild(card);
     });
 
@@ -321,152 +308,117 @@ function renderPlayers() {
     updateImposterOptions();
 }
 
-function editPlayer(index) {
+function editPlayer(i) {
     const newName = prompt(
         "Edit player name:",
-        players[index]
+        players[i]
     );
 
     if (newName === null) return;
 
-    const cleanName = newName.trim();
+    const name = newName.trim();
 
-    if (!cleanName) return;
+    if (!name) return;
 
-    const duplicate = players.some(
-        (player, i) =>
-            i !== index &&
-            player.toLowerCase() === cleanName.toLowerCase()
-    );
-
-    if (duplicate) {
+    if (
+        players.some(
+            (p, index) =>
+                index !== i &&
+                p.toLowerCase() === name.toLowerCase()
+        )
+    ) {
         alert("That player name already exists.");
         return;
     }
 
-    players[index] = cleanName;
+    players[i] = name;
 
     renderPlayers();
 }
 
-function removePlayer(index) {
-    players.splice(index, 1);
+function removePlayer(i) {
+    players.splice(i, 1);
 
-    if (players.length < 3) {
-        imposterCount = 1;
-    } else if (imposterCount >= players.length) {
-        imposterCount = Math.max(1, players.length - 1);
+    if (imposterCount > maxImposters()) {
+        imposterCount = maxImposters();
     }
 
     renderPlayers();
-    updateImposterOptions();
 }
 
-const playersBackBtn =
-    document.getElementById("playersBackBtn");
+playersBackBtn?.addEventListener("click", () => {
+    showScreen(screens.home);
+});
 
-if (playersBackBtn) {
-    playersBackBtn.addEventListener("click", () => {
-        showScreen(screens.home);
-    });
-}
+playersContinueBtn?.addEventListener("click", () => {
+    if (players.length < 3) {
+        alert("You need at least 3 players.");
+        return;
+    }
 
-if (playersContinueBtn) {
-    playersContinueBtn.addEventListener("click", () => {
-        if (players.length < 3) {
-            alert("You need at least 3 players.");
-            return;
-        }
-
-        renderCategories();
-        showScreen(screens.category);
-    });
-}
+    renderCategories();
+    showScreen(screens.category);
+});
 
 /* =========================================================
-   CATEGORY SELECTION
+   CATEGORIES
 ========================================================= */
-
-function chooseRandomCategory() {
-    const availableCategories = categories.filter(
-        category =>
-            category.name !== "Random" &&
-            category.words &&
-            category.words.length > 0
-    );
-
-    if (!availableCategories.length) {
-        return null;
-    }
-
-    return randomItem(availableCategories);
-}
 
 function renderCategories() {
     if (!categoryGrid) return;
 
     categoryGrid.innerHTML = "";
 
-    categories.forEach((category, index) => {
+    categories.forEach((cat, i) => {
         const button = document.createElement("button");
 
         button.type = "button";
         button.className = "category-option";
 
         if (
-            selectedCategoryIndex === index &&
-            selectedCategory
+            selectedCategories.some(
+                c => c.name === cat.name
+            )
         ) {
             button.classList.add("selected");
         }
 
         button.innerHTML = `
             <span class="category-icon">
-                ${category.icon}
+                ${cat.icon}
             </span>
 
-            <span>
-                ${escapeHTML(category.name)}
-            </span>
+            <span>${esc(cat.name)}</span>
         `;
 
         button.addEventListener("click", () => {
-            selectCategory(index);
+            selectCategory(i);
         });
 
         categoryGrid.appendChild(button);
     });
 
-    if (
-        customCategory &&
-        customCategory.words &&
-        customCategory.words.length > 0
-    ) {
+    if (customCategory?.words?.length) {
         const button = document.createElement("button");
 
         button.type = "button";
         button.className = "category-option";
 
-        if (selectedCategory === customCategory) {
+        if (
+            selectedCategories.some(
+                c => c.name === customCategory.name
+            )
+        ) {
             button.classList.add("selected");
         }
 
         button.innerHTML = `
             <span class="category-icon">✨</span>
-            <span>${escapeHTML(customCategory.name)}</span>
+            <span>${esc(customCategory.name)}</span>
         `;
 
         button.addEventListener("click", () => {
-            if (selectedCategory === customCategory) {
-                selectedCategory = null;
-                selectedCategoryIndex = null;
-            } else {
-                selectedCategory = customCategory;
-                selectedCategoryIndex = null;
-            }
-
-            updateCategoryUI();
-            renderCategories();
+            toggleCategory(customCategory);
         });
 
         categoryGrid.appendChild(button);
@@ -475,160 +427,108 @@ function renderCategories() {
     updateCategoryUI();
 }
 
-function selectCategory(index) {
-    const category = categories[index];
+function selectCategory(i) {
+    const cat = categories[i];
 
-    if (!category) return;
+    if (!cat) return;
 
-    /* -----------------------------------------------------
-       RANDOM
-       Click once = choose a random real category.
-       Click again = deselect.
-    ----------------------------------------------------- */
+    if (cat.name === "Random") {
+        const available = categories.filter(
+            c =>
+                c.name !== "Random" &&
+                c.words.length
+        );
 
-    if (category.name === "Random") {
-        if (
-            selectedCategory &&
-            selectedCategory.__randomSelection === true
-        ) {
-            selectedCategory = null;
-            selectedCategoryIndex = null;
-
-            updateCategoryUI();
-            renderCategories();
-
-            return;
-        }
-
-        const randomCategory = chooseRandomCategory();
-
-        if (!randomCategory) {
-            alert("No categories are available.");
-            return;
-        }
-
-        selectedCategory = {
-            name: randomCategory.name,
-            icon: randomCategory.icon,
-            words: [...randomCategory.words],
-            __randomSelection: true
-        };
-
-        selectedCategoryIndex = index;
+        selectedCategories = [
+            randomItem(available)
+        ];
 
         customCategory = null;
 
-        updateCategoryUI();
         renderCategories();
-
         return;
     }
 
-    /* -----------------------------------------------------
-       NORMAL CATEGORY
-       Click once = select.
-       Click again = deselect.
-    ----------------------------------------------------- */
+    toggleCategory(cat);
+}
+
+function toggleCategory(cat) {
+    const i = selectedCategories.findIndex(
+        c => c.name === cat.name
+    );
+
+    if (i >= 0) {
+        selectedCategories.splice(i, 1);
+    } else {
+        selectedCategories.push(cat);
+    }
+
+    renderCategories();
+}
+
+customCategoryBtn?.addEventListener("click", () => {
+    customCategoryForm?.classList.toggle("hidden");
 
     if (
-        selectedCategoryIndex === index &&
-        selectedCategory &&
-        selectedCategory.__randomSelection !== true
+        customCategoryForm &&
+        !customCategoryForm.classList.contains("hidden")
     ) {
-        selectedCategory = null;
-        selectedCategoryIndex = null;
-    } else {
-        selectedCategory = category;
-        selectedCategoryIndex = index;
+        customCategoryName?.focus();
     }
-
-    customCategory = null;
-
-    if (customCategoryForm) {
-        customCategoryForm.classList.add("hidden");
-    }
-
-    updateCategoryUI();
-    renderCategories();
-}
-
-/* =========================================================
-   CUSTOM CATEGORY
-========================================================= */
-
-if (customCategoryBtn) {
-    customCategoryBtn.addEventListener("click", () => {
-        if (!customCategoryForm) return;
-
-        customCategoryForm.classList.toggle("hidden");
-
-        if (
-            !customCategoryForm.classList.contains("hidden") &&
-            customCategoryName
-        ) {
-            customCategoryName.focus();
-        }
-    });
-}
-
-function buildCustomCategoryFromInputs() {
-    if (!customCategoryName || !customCategoryWords) {
-        return null;
-    }
-
-    const name = customCategoryName.value.trim();
-
-    const words = customCategoryWords.value
-        .split(",")
-        .map(word => word.trim())
-        .filter(Boolean);
-
-    if (!name || words.length < 1) {
-        return null;
-    }
-
-    return {
-        name: name,
-        icon: "✨",
-        words: words
-    };
-}
+});
 
 function updateCustomCategory() {
-    const category = buildCustomCategoryFromInputs();
-
-    if (!category) {
+    if (!customCategoryName || !customCategoryWords) {
         return;
     }
 
-    customCategory = category;
-    selectedCategory = category;
-    selectedCategoryIndex = null;
+    const name =
+        customCategoryName.value.trim();
 
-    updateCategoryUI();
+    const words =
+        customCategoryWords.value
+            .split(",")
+            .map(w => w.trim())
+            .filter(Boolean);
+
+    if (!name || !words.length) return;
+
+    customCategory = {
+        name,
+        icon: "✨",
+        words
+    };
+
+    const i = selectedCategories.findIndex(
+        c => c.name === name
+    );
+
+    if (i < 0) {
+        selectedCategories.push(customCategory);
+    } else {
+        selectedCategories[i] =
+            customCategory;
+    }
+
     renderCategories();
 }
 
-if (customCategoryName) {
-    customCategoryName.addEventListener(
-        "input",
-        updateCustomCategory
-    );
-}
+customCategoryName?.addEventListener(
+    "input",
+    updateCustomCategory
+);
 
-if (customCategoryWords) {
-    customCategoryWords.addEventListener(
-        "input",
-        updateCustomCategory
-    );
-}
+customCategoryWords?.addEventListener(
+    "input",
+    updateCustomCategory
+);
 
 function updateCategoryUI() {
     if (!categoryStatus) return;
 
-    if (!selectedCategory) {
+    if (!selectedCategories.length) {
         categoryStatus.textContent =
-            "Choose a category";
+            "Choose at least one category";
 
         if (categoryContinueBtn) {
             categoryContinueBtn.disabled = true;
@@ -638,142 +538,86 @@ function updateCategoryUI() {
     }
 
     categoryStatus.textContent =
-        `Category = ${selectedCategory.name}`;
+        selectedCategories.length === 1
+            ? `Category = ${selectedCategories[0].name}`
+            : `${selectedCategories.length} categories selected`;
 
     if (categoryContinueBtn) {
         categoryContinueBtn.disabled = false;
     }
 }
 
-/* =========================================================
-   CATEGORY CONTINUE
-========================================================= */
+categoryBackBtn?.addEventListener("click", () => {
+    showScreen(screens.players);
+});
 
-if (categoryContinueBtn) {
-    categoryContinueBtn.addEventListener("click", () => {
-        /* Make sure a category is selected. */
-        if (!selectedCategory) {
-            alert("Please select a category.");
-            return;
-        }
-
-        if (
-            !selectedCategory.words ||
-            selectedCategory.words.length === 0
-        ) {
-            alert("This category has no words.");
-            return;
-        }
-
-        setupImposterScreen();
-
-        showScreen(screens.imposter);
-    });
-}
-
-const categoryBackBtn =
-    document.getElementById("categoryBackBtn");
-
-if (categoryBackBtn) {
-    categoryBackBtn.addEventListener("click", () => {
-        showScreen(screens.players);
-    });
-}
-
-/* =========================================================
-   IMPOSTER COUNT
-========================================================= */
-
-function getMaxImposters() {
-    if (players.length < 2) {
-        return 1;
+categoryContinueBtn?.addEventListener("click", () => {
+    if (!selectedCategories.length) {
+        alert("Please select at least one category.");
+        return;
     }
 
-    /*
-       10 civilians + maximum 9 imposters.
-       In general:
-       max imposters = players - 1.
-    */
-    return Math.max(1, players.length - 1);
-}
-
-function setupImposterScreen() {
     updateImposterOptions();
-
     showScreen(screens.imposter);
-}
+});
+
+/* =========================================================
+   IMPOSTERS
+========================================================= */
+
+const imposterLabels = {
+    1: "Lone Wolf",
+    2: "Double Trouble",
+    3: "Triple Threat",
+    4: "Quad Squad",
+    5: "Five Alive",
+    6: "Chaos Crew",
+    7: "Seven Sinners",
+    8: "Eight Invaders",
+    9: "Ultimate Chaos",
+    10: "Total Mayhem",
+    11: "Almost Everyone"
+};
 
 function updateImposterOptions() {
-    const max = getMaxImposters();
+    if (!players.length) return;
+
+    const max = maxImposters();
 
     if (imposterCount > max) {
         imposterCount = max;
     }
 
-    const options =
-        document.querySelectorAll(".imposter-option");
-
-    options.forEach(option => {
-        const count = Number(
-            option.dataset.count
-        );
-
-        option.classList.toggle(
-            "selected",
-            count === imposterCount
-        );
-
-        option.disabled = count > max;
-
-        option.style.display =
-            count > max ? "none" : "";
-    });
-
-    /*
-       Create extra buttons dynamically for
-       4 through maximum.
-    */
-
     const container =
         document.querySelector(".imposter-options");
 
-    if (container) {
-        let dynamicOptions =
-            container.querySelectorAll(
-                ".dynamic-imposter-option"
-            );
+    if (!container) return;
 
-        dynamicOptions.forEach(option => {
-            option.remove();
+    container.innerHTML = "";
+
+    for (let n = 1; n <= max; n++) {
+        const button = document.createElement("button");
+
+        button.type = "button";
+        button.className = "imposter-option";
+
+        if (n === imposterCount) {
+            button.classList.add("selected");
+        }
+
+        button.innerHTML = `
+            <strong>${n}</strong>
+            <span>
+                ${imposterLabels[n] || `${n} Imposters`}
+            </span>
+        `;
+
+        button.addEventListener("click", () => {
+            imposterCount = n;
+            updateImposterOptions();
         });
 
-        for (let count = 4; count <= max; count++) {
-            const button =
-                document.createElement("button");
-
-            button.type = "button";
-
-            button.className =
-                "imposter-option dynamic-imposter-option";
-
-            if (count === imposterCount) {
-                button.classList.add("selected");
-            }
-
-            button.dataset.count = String(count);
-
-            button.innerHTML = `
-                <strong>${count}</strong>
-                <span>${getImposterLabel(count)}</span>
-            `;
-
-            button.addEventListener("click", () => {
-                imposterCount = count;
-                updateImposterOptions();
-            });
-
-            container.appendChild(button);
-        }
+        container.appendChild(button);
     }
 
     if (imposterLimitText) {
@@ -782,86 +626,27 @@ function updateImposterOptions() {
     }
 }
 
-function getImposterLabel(count) {
-    if (count === 1) return "Lone Wolf";
-    if (count === 2) return "Double Trouble";
-    if (count === 3) return "Triple Threat";
-    if (count === 4) return "Quad Squad";
-    if (count === 5) return "Five Alive";
-    if (count === 6) return "Chaos Crew";
-    if (count === 7) return "Seven Sinners";
-    if (count === 8) return "Eight Invaders";
-    if (count === 9) return "Ultimate Chaos";
+imposterBackBtn?.addEventListener("click", () => {
+    showScreen(screens.category);
+});
 
-    return `${count} Imposters`;
-}
-
-document
-    .querySelectorAll(".imposter-option")
-    .forEach(option => {
-        option.addEventListener("click", () => {
-            const count =
-                Number(option.dataset.count);
-
-            const max = getMaxImposters();
-
-            if (count > max) {
-                return;
-            }
-
-            imposterCount = count;
-
-            updateImposterOptions();
-        });
-    });
-
-if (imposterContinueBtn) {
-    imposterContinueBtn.addEventListener("click", () => {
-        if (players.length < 3) {
-            alert("You need at least 3 players.");
-            return;
-        }
-
-        const max = getMaxImposters();
-
-        if (
-            imposterCount < 1 ||
-            imposterCount > max
-        ) {
-            imposterCount = 1;
-        }
-
-        resetDareState();
-
-        showScreen(screens.dare);
-    });
-}
-
-if (imposterBackBtn) {
-    imposterBackBtn.addEventListener("click", () => {
-        showScreen(screens.category);
-    });
-}
+imposterContinueBtn?.addEventListener("click", () => {
+    resetDare();
+    showScreen(screens.dare);
+});
 
 /* =========================================================
-   DARE
+   DARE SETUP
 ========================================================= */
 
-function resetDareState() {
+function resetDare() {
     dareEnabled = null;
     dareText = "";
 
-    if (dareYesBtn) {
-        dareYesBtn.classList.remove("selected");
-    }
+    dareYesBtn?.classList.remove("selected");
+    dareNoBtn?.classList.remove("selected");
 
-    if (dareNoBtn) {
-        dareNoBtn.classList.remove("selected");
-    }
-
-    if (dareInputContainer) {
-        dareInputContainer.classList.add("hidden");
-    }
+    dareInputContainer?.classList.add("hidden");
 
     if (dareInput) {
         dareInput.value = "";
@@ -872,161 +657,115 @@ function resetDareState() {
             "Choose YES or NO";
     }
 
-    updateStartRoundButton();
+    updateStartRound();
 }
 
-if (dareYesBtn) {
-    dareYesBtn.addEventListener("click", () => {
-        dareEnabled = true;
+dareYesBtn?.addEventListener("click", () => {
+    dareEnabled = true;
 
-        dareYesBtn.classList.add("selected");
+    dareYesBtn.classList.add("selected");
+    dareNoBtn?.classList.remove("selected");
 
-        if (dareNoBtn) {
-            dareNoBtn.classList.remove("selected");
-        }
+    dareInputContainer?.classList.remove("hidden");
 
-        if (dareInputContainer) {
-            dareInputContainer.classList.remove("hidden");
-        }
+    if (dareStatus) {
+        dareStatus.textContent =
+            "Enter the dare below";
+    }
 
-        if (dareStatus) {
-            dareStatus.textContent =
-                "Enter the dare below";
-        }
+    updateStartRound();
+});
 
-        updateStartRoundButton();
-    });
-}
+dareNoBtn?.addEventListener("click", () => {
+    dareEnabled = false;
+    dareText = "";
 
-if (dareNoBtn) {
-    dareNoBtn.addEventListener("click", () => {
-        dareEnabled = false;
-        dareText = "";
+    dareNoBtn.classList.add("selected");
+    dareYesBtn?.classList.remove("selected");
 
-        dareNoBtn.classList.add("selected");
+    dareInputContainer?.classList.add("hidden");
 
-        if (dareYesBtn) {
-            dareYesBtn.classList.remove("selected");
-        }
+    if (dareInput) {
+        dareInput.value = "";
+    }
 
-        if (dareInputContainer) {
-            dareInputContainer.classList.add("hidden");
-        }
+    if (dareStatus) {
+        dareStatus.textContent =
+            "No dare this round";
+    }
 
-        if (dareInput) {
-            dareInput.value = "";
-        }
+    updateStartRound();
+});
 
-        if (dareStatus) {
-            dareStatus.textContent =
-                "No dare this round";
-        }
+dareInput?.addEventListener("input", () => {
+    dareText =
+        dareInput.value.trim();
 
-        updateStartRoundButton();
-    });
-}
+    updateStartRound();
+});
 
-if (dareInput) {
-    dareInput.addEventListener("input", () => {
-        dareText = dareInput.value.trim();
-        updateStartRoundButton();
-    });
-}
-
-function updateStartRoundButton() {
+function updateStartRound() {
     if (!startRoundBtn) return;
 
-    if (dareEnabled === null) {
-        startRoundBtn.disabled = true;
-        return;
-    }
-
-    if (dareEnabled === true) {
-        startRoundBtn.disabled =
-            !dareInput ||
-            !dareInput.value.trim();
-
-        return;
-    }
-
-    startRoundBtn.disabled = false;
+    startRoundBtn.disabled =
+        dareEnabled === null ||
+        (
+            dareEnabled &&
+            !dareInput?.value.trim()
+        );
 }
 
-if (dareBackBtn) {
-    dareBackBtn.addEventListener("click", () => {
-        showScreen(screens.imposter);
-    });
-}
+dareBackBtn?.addEventListener("click", () => {
+    showScreen(screens.imposter);
+});
 
 /* =========================================================
    START ROUND
 ========================================================= */
 
-if (startRoundBtn) {
-    startRoundBtn.addEventListener("click", () => {
-        if (dareEnabled === null) {
-            alert("Please choose YES or NO for the dare.");
-            return;
-        }
+startRoundBtn?.addEventListener("click", () => {
+    if (dareEnabled === null) {
+        alert("Please choose YES or NO for the dare.");
+        return;
+    }
 
-        if (
-            dareEnabled === true &&
-            (
-                !dareInput ||
-                !dareInput.value.trim()
-            )
-        ) {
-            alert("Please enter the dare.");
+    if (
+        dareEnabled &&
+        !dareInput?.value.trim()
+    ) {
+        alert("Please enter the dare.");
+        dareInput?.focus();
+        return;
+    }
 
-            if (dareInput) {
-                dareInput.focus();
-            }
+    dareText =
+        dareEnabled
+            ? dareInput.value.trim()
+            : "";
 
-            return;
-        }
+    if (!prepareRound()) return;
 
-        if (dareEnabled === true) {
-            dareText = dareInput.value.trim();
-        } else {
-            dareText = "";
-        }
+    currentRevealIndex = 0;
 
-        const success = prepareRound();
-
-        if (!success) {
-            return;
-        }
-
-        currentRevealIndex = 0;
-        secretShown = false;
-
-        /*
-           IMPORTANT:
-           The first thing shown is the player name.
-           Word / role is NOT shown until the player
-           presses SHOW WORD / ROLE.
-        */
-        showPlayerIdentity();
-
-        showScreen(screens.reveal);
-    });
-}
+    showPlayerIdentity();
+    showScreen(screens.reveal);
+});
 
 /* =========================================================
    PREPARE ROUND
 ========================================================= */
 
 function prepareRound() {
-    if (!selectedCategory) {
-        alert("Please select a category.");
-        return false;
-    }
-
     const words =
-        selectedCategory.words || [];
+        selectedCategories.flatMap(
+            c => c.words || []
+        );
 
     if (!words.length) {
-        alert("This category has no words.");
+        alert(
+            "The selected categories contain no words."
+        );
+
         return false;
     }
 
@@ -1035,56 +774,45 @@ function prepareRound() {
     imposters = chooseImposters();
 
     if (
-        !imposters ||
-        imposters.length !== imposterCount
+        imposters.length !==
+        imposterCount
     ) {
-        alert("Could not create the required number of imposters.");
+        alert(
+            "Could not create the required number of imposters."
+        );
+
         return false;
     }
-
-    currentRevealIndex = 0;
-    secretShown = false;
 
     selectedVotes = [];
     voteRevealIndex = 0;
 
     result = null;
+    randomSpeakingPlayer = null;
+    dareAssignedPlayer = null;
 
     return true;
 }
 
-/* =========================================================
-   CHOOSE IMPOSTERS
-========================================================= */
-
 function chooseImposters() {
-    const available =
-        players.map((_, index) => index);
+    const indexes =
+        shuffle(
+            players.map((_, i) => i)
+        );
 
-    shuffleArray(available);
+    const fresh =
+        indexes.filter(
+            i => !recentImposters.includes(i)
+        );
 
-    /*
-       Give players who were recently imposters
-       lower priority.
-    */
-
-    const fresh = available.filter(
-        index =>
-            !recentImposters.includes(index)
-    );
-
-    const old = available.filter(
-        index =>
-            recentImposters.includes(index)
-    );
-
-    const pool = [
-        ...fresh,
-        ...old
-    ];
+    const old =
+        indexes.filter(
+            i => recentImposters.includes(i)
+        );
 
     const chosen =
-        pool.slice(0, imposterCount);
+        [...fresh, ...old]
+            .slice(0, imposterCount);
 
     recentImposters = [...chosen];
 
@@ -1092,43 +820,28 @@ function chooseImposters() {
 }
 
 /* =========================================================
-   PRIVATE PLAYER REVEAL
+   COMBINED PASS PHONE + PLAYER REVEAL
 ========================================================= */
 
 function showPlayerIdentity() {
-    secretShown = false;
+    const card = $("revealCard");
+
+    if (!card) return;
 
     const player =
         players[currentRevealIndex];
 
-    const card =
-        document.getElementById("revealCard");
-
-    if (!card) return;
-
     const progress =
-        (
-            (currentRevealIndex + 1) /
-            players.length
-        ) * 100;
+        ((currentRevealIndex + 1) /
+            players.length) * 100;
 
-    const progressText =
-        document.getElementById(
-            "revealProgressText"
-        );
-
-    const progressBar =
-        document.getElementById(
-            "revealProgress"
-        );
-
-    if (progressText) {
-        progressText.textContent =
+    if ($("revealProgressText")) {
+        $("revealProgressText").textContent =
             `PLAYER ${currentRevealIndex + 1} OF ${players.length}`;
     }
 
-    if (progressBar) {
-        progressBar.style.width =
+    if ($("revealProgress")) {
+        $("revealProgress").style.width =
             `${progress}%`;
     }
 
@@ -1136,30 +849,28 @@ function showPlayerIdentity() {
 
     card.innerHTML = `
         <div class="reveal-icon">
-            👤
+            📱
         </div>
 
         <div class="secret-label">
-            THIS PLAYER
+            PASS THE PHONE TO
         </div>
 
-        <div class="reveal-player">
-            ${escapeHTML(player)}
-        </div>
 
         <p class="reveal-description">
-            Only ${escapeHTML(player)}
-            should look at this screen.
+         
+            Make sure no one is watching you. Keep the phone hidden from other players
+            before continuing.
         </p>
 
-        <div class="category-lock">
-            <span class="category-lock-label">
-                CATEGORY
-            </span>
 
-            <span class="category-lock-value">
-                ${escapeHTML(selectedCategory.name)}
-            </span>
+        <div class="pass-player-name">
+            ${esc(player)}
+        </div>
+
+        <div class="reveal-divider"></div>
+
+    
         </div>
 
         <button
@@ -1167,21 +878,14 @@ function showPlayerIdentity() {
             id="showSecretBtn"
             type="button"
         >
-            SHOW WORD / ROLE
+            TAP TO REVEAL
         </button>
     `;
 
-    const showSecretBtn =
-        document.getElementById(
-            "showSecretBtn"
-        );
-
-    if (showSecretBtn) {
-        showSecretBtn.addEventListener(
-            "click",
-            showCurrentSecret
-        );
-    }
+    $("showSecretBtn")?.addEventListener(
+        "click",
+        showCurrentSecret
+    );
 }
 
 /* =========================================================
@@ -1189,22 +893,22 @@ function showPlayerIdentity() {
 ========================================================= */
 
 function showCurrentSecret() {
-    secretShown = true;
+    const card = $("revealCard");
+
+    if (!card) return;
 
     const player =
         players[currentRevealIndex];
 
-    const isImposter =
-        imposters.includes(currentRevealIndex);
+    const imposter =
+        imposters.includes(
+            currentRevealIndex
+        );
 
-    const card =
-        document.getElementById("revealCard");
+    card.className =
+        "reveal-card";
 
-    if (!card) return;
-
-    card.className = "reveal-card";
-
-    if (isImposter) {
+    if (imposter) {
         card.classList.add("danger");
 
         card.innerHTML = `
@@ -1213,7 +917,7 @@ function showCurrentSecret() {
             </div>
 
             <div class="reveal-player">
-                ${escapeHTML(player)}
+                ${esc(player)}
             </div>
 
             <div class="role-badge danger-badge">
@@ -1235,7 +939,7 @@ function showCurrentSecret() {
                 </span>
 
                 <span class="category-lock-value">
-                    ${escapeHTML(selectedCategory.name)}
+                    ${esc(categoryName())}
                 </span>
             </div>
 
@@ -1258,7 +962,7 @@ function showCurrentSecret() {
             </div>
 
             <div class="reveal-player">
-                ${escapeHTML(player)}
+                ${esc(player)}
             </div>
 
             <div class="role-badge safe-badge">
@@ -1270,7 +974,7 @@ function showCurrentSecret() {
             </div>
 
             <div class="secret-word">
-                ${escapeHTML(secretWord)}
+                ${esc(secretWord)}
             </div>
 
             <p class="reveal-description">
@@ -1283,7 +987,7 @@ function showCurrentSecret() {
                 </span>
 
                 <span class="category-lock-value">
-                    ${escapeHTML(selectedCategory.name)}
+                    ${esc(categoryName())}
                 </span>
             </div>
 
@@ -1301,138 +1005,256 @@ function showCurrentSecret() {
         `;
     }
 
-    const hideRevealBtn =
-        document.getElementById(
-            "hideRevealBtn"
-        );
-
-    if (hideRevealBtn) {
-        hideRevealBtn.addEventListener(
-            "click",
-            finishCurrentReveal
-        );
-    }
+    $("hideRevealBtn")?.addEventListener(
+        "click",
+        finishReveal
+    );
 }
 
 /* =========================================================
-   FINISH CURRENT REVEAL
+   FINISH PLAYER REVEAL
 ========================================================= */
 
-function finishCurrentReveal() {
-    secretShown = false;
-
+function finishReveal() {
     if (
         currentRevealIndex >=
         players.length - 1
     ) {
-        showScreen(screens.discussion);
+        showDiscussion();
         return;
     }
 
     currentRevealIndex++;
 
-    const passPlayerName =
-        document.getElementById(
-            "passPlayerName"
-        );
+    /*
+       IMPORTANT:
+       We DO NOT show passScreen anymore.
 
-    if (passPlayerName) {
-        passPlayerName.textContent =
-            `Give it to ${players[currentRevealIndex]}.`;
-    }
+       The next player receives the same combined
+       PASS THE PHONE + YOU ARE screen.
+    */
 
-    showScreen(screens.pass);
-}
-
-if (nextRevealBtn) {
-    nextRevealBtn.addEventListener("click", () => {
-        showPlayerIdentity();
-        showScreen(screens.reveal);
-    });
+    showPlayerIdentity();
+    showScreen(screens.reveal);
 }
 
 /* =========================================================
-   DISCUSSION
+   OLD PASS SCREEN DISABLED
 ========================================================= */
 
-if (goVotingBtn) {
-    goVotingBtn.addEventListener("click", () => {
+nextRevealBtn?.addEventListener(
+    "click",
+    e => {
+        e.preventDefault();
+
+        showPlayerIdentity();
+        showScreen(screens.reveal);
+    }
+);
+
+/* =========================================================
+   DISCUSSION + SPIN WHEEL
+========================================================= */
+
+function showDiscussion() {
+    randomSpeakingPlayer = null;
+    wheelSpinning = false;
+
+    const box =
+        $("randomPlayerBox");
+
+    if (box) {
+        box.innerHTML = `
+            <div class="wheel-display">
+                🎡
+            </div>
+
+            <strong>
+                Spin to choose a random player
+            </strong>
+        `;
+    }
+
+    if (pickRandomPlayerBtn) {
+        pickRandomPlayerBtn.disabled = false;
+        pickRandomPlayerBtn.textContent =
+            "🎡 SPIN THE WHEEL";
+    }
+
+    showScreen(screens.discussion);
+}
+
+pickRandomPlayerBtn?.addEventListener(
+    "click",
+    () => {
+        if (
+            wheelSpinning ||
+            !players.length
+        ) {
+            return;
+        }
+
+        wheelSpinning = true;
+
+        pickRandomPlayerBtn.disabled = true;
+        pickRandomPlayerBtn.textContent =
+            "🎡 SPINNING...";
+
+        const box =
+            $("randomPlayerBox");
+
+        let step = 0;
+        const totalSteps =
+            18 + Math.floor(
+                Math.random() * 12
+            );
+
+        const interval =
+            setInterval(() => {
+                const preview =
+                    players[
+                        step %
+                        players.length
+                    ];
+
+                if (box) {
+                    box.innerHTML = `
+                        <div class="wheel-display">
+                            🎡
+                        </div>
+
+                        <strong>
+                            ${esc(preview)}
+                        </strong>
+                    `;
+                }
+
+                step++;
+
+                if (step >= totalSteps) {
+                    clearInterval(interval);
+
+                    randomSpeakingPlayer =
+                        randomItem(players);
+
+                    if (box) {
+                        box.innerHTML = `
+                            <div class="wheel-display">
+                                🎤
+                            </div>
+
+                            <strong>
+                                ${esc(
+                                    randomSpeakingPlayer
+                                )}
+                            </strong>
+
+                            <span>
+                                speaks first!
+                            </span>
+                        `;
+                    }
+
+                    pickRandomPlayerBtn.disabled =
+                        false;
+
+                    pickRandomPlayerBtn.textContent =
+                        "🎡 SPIN AGAIN";
+
+                    wheelSpinning = false;
+                }
+            }, 80);
+    }
+);
+
+/* =========================================================
+   GO TO VOTING
+========================================================= */
+
+goVotingBtn?.addEventListener(
+    "click",
+    () => {
         selectedVotes = [];
 
         renderVoting();
 
         showScreen(screens.voting);
-    });
-}
+    }
+);
 
 /* =========================================================
    VOTING
 ========================================================= */
 
 function renderVoting() {
-    const requiredVoteCount =
-        document.getElementById(
-            "requiredVoteCount"
-        );
-
-    if (requiredVoteCount) {
-        requiredVoteCount.textContent =
-            imposterCount;
+    if ($("requiredVoteCount")) {
+        $("requiredVoteCount").textContent =
+            String(imposterCount);
     }
 
-    const voteList =
-        document.getElementById("voteList");
+    const list =
+        $("voteList");
 
-    if (!voteList) return;
+    if (!list) return;
 
-    voteList.innerHTML = "";
+    list.innerHTML = "";
 
-    players.forEach((player, index) => {
-        const button =
-            document.createElement("button");
+    players.forEach(
+        (player, i) => {
+            const button =
+                document.createElement(
+                    "button"
+                );
 
-        button.type = "button";
-        button.className = "vote-card";
+            button.type = "button";
+            button.className =
+                "vote-card";
 
-        if (selectedVotes.includes(index)) {
-            button.classList.add("selected");
+            const selected =
+                selectedVotes.includes(i);
+
+            if (selected) {
+                button.classList.add(
+                    "selected"
+                );
+            }
+
+            button.innerHTML = `
+                <span class="avatar">
+                    ${esc(
+                        player[0]
+                            .toUpperCase()
+                    )}
+                </span>
+
+                <span>
+                    ${esc(player)}
+                </span>
+
+                <span class="vote-check">
+                    ${selected ? "✓" : ""}
+                </span>
+            `;
+
+            button.addEventListener(
+                "click",
+                () => toggleVote(i)
+            );
+
+            list.appendChild(button);
         }
-
-        button.innerHTML = `
-            <span class="avatar">
-                ${escapeHTML(
-                    player.charAt(0).toUpperCase()
-                )}
-            </span>
-
-            <span>
-                ${escapeHTML(player)}
-            </span>
-
-            <span class="vote-check">
-                ${
-                    selectedVotes.includes(index)
-                        ? "✓"
-                        : ""
-                }
-            </span>
-        `;
-
-        button.addEventListener("click", () => {
-            toggleVote(index);
-        });
-
-        voteList.appendChild(button);
-    });
+    );
 
     updateVoteCounter();
 }
 
-function toggleVote(index) {
-    if (selectedVotes.includes(index)) {
+function toggleVote(i) {
+    if (
+        selectedVotes.includes(i)
+    ) {
         selectedVotes =
             selectedVotes.filter(
-                vote => vote !== index
+                v => v !== i
             );
     } else {
         if (
@@ -1442,51 +1264,41 @@ function toggleVote(index) {
             return;
         }
 
-        selectedVotes.push(index);
+        selectedVotes.push(i);
     }
 
     renderVoting();
 }
 
 function updateVoteCounter() {
-    const counter =
-        document.getElementById(
-            "voteCounter"
-        );
+    const count =
+        selectedVotes.length;
 
-    if (counter) {
-        counter.textContent =
-            `${selectedVotes.length} / ${imposterCount}`;
+    if ($("voteCounter")) {
+        $("voteCounter").textContent =
+            `${count} / ${imposterCount}`;
     }
 
-    const submit =
-        document.getElementById(
-            "submitVoteBtn"
-        );
-
-    if (submit) {
-        submit.disabled =
-            selectedVotes.length !==
-            imposterCount;
+    if ($("submitVoteBtn")) {
+        $("submitVoteBtn").disabled =
+            count !== imposterCount;
     }
 
-    const status =
-        document.getElementById(
-            "voteStatus"
-        );
-
-    if (status) {
-        status.textContent =
-            selectedVotes.length === imposterCount
+    if ($("voteStatus")) {
+        $("voteStatus").textContent =
+            count === imposterCount
                 ? "Ready to reveal."
                 : `Choose ${imposterCount} player${
-                    imposterCount === 1 ? "" : "s"
-                  }.`;
+                    imposterCount === 1
+                        ? ""
+                        : "s"
+                }.`;
     }
 }
 
-if (submitVoteBtn) {
-    submitVoteBtn.addEventListener("click", () => {
+submitVoteBtn?.addEventListener(
+    "click",
+    () => {
         if (
             selectedVotes.length !==
             imposterCount
@@ -1498,9 +1310,11 @@ if (submitVoteBtn) {
 
         renderVoteReveal();
 
-        showScreen(screens.voteReveal);
-    });
-}
+        showScreen(
+            screens.voteReveal
+        );
+    }
+);
 
 /* =========================================================
    VOTE REVEAL
@@ -1508,50 +1322,41 @@ if (submitVoteBtn) {
 
 function renderVoteReveal() {
     const selectedIndex =
-        selectedVotes[voteRevealIndex];
+        selectedVotes[
+            voteRevealIndex
+        ];
 
     const player =
         players[selectedIndex];
 
-    const isActuallyImposter =
-        imposters.includes(selectedIndex);
+    const actualImposter =
+        imposters.includes(
+            selectedIndex
+        );
 
     const progress =
-        (
-            (voteRevealIndex + 1) /
-            selectedVotes.length
-        ) * 100;
+        ((voteRevealIndex + 1) /
+            selectedVotes.length) * 100;
 
-    const progressText =
-        document.getElementById(
-            "voteRevealProgressText"
-        );
-
-    const progressBar =
-        document.getElementById(
-            "voteRevealProgress"
-        );
-
-    if (progressText) {
-        progressText.textContent =
+    if ($("voteRevealProgressText")) {
+        $("voteRevealProgressText").textContent =
             `REVEAL ${voteRevealIndex + 1} OF ${selectedVotes.length}`;
     }
 
-    if (progressBar) {
-        progressBar.style.width =
+    if ($("voteRevealProgress")) {
+        $("voteRevealProgress").style.width =
             `${progress}%`;
     }
 
     const card =
-        document.getElementById(
-            "voteRevealCard"
-        );
+        $("voteRevealCard");
 
     if (!card) return;
 
-    card.className = "reveal-card";
+    card.className =
+        "reveal-card";
 
-    if (isActuallyImposter) {
+    if (actualImposter) {
         card.classList.add("danger");
 
         card.innerHTML = `
@@ -1560,7 +1365,7 @@ function renderVoteReveal() {
             </div>
 
             <div class="reveal-player">
-                ${escapeHTML(player)}
+                ${esc(player)}
             </div>
 
             <div class="role-badge danger-badge">
@@ -1590,7 +1395,7 @@ function renderVoteReveal() {
             </div>
 
             <div class="reveal-player">
-                ${escapeHTML(player)}
+                ${esc(player)}
             </div>
 
             <div class="role-badge safe-badge">
@@ -1615,17 +1420,10 @@ function renderVoteReveal() {
         `;
     }
 
-    const nextBtn =
-        document.getElementById(
-            "nextVoteRevealBtn"
-        );
-
-    if (nextBtn) {
-        nextBtn.addEventListener(
-            "click",
-            nextVoteReveal
-        );
-    }
+    $("nextVoteRevealBtn")?.addEventListener(
+        "click",
+        nextVoteReveal
+    );
 }
 
 function nextVoteReveal() {
@@ -1635,7 +1433,9 @@ function nextVoteReveal() {
     ) {
         calculateResult();
 
-        showScreen(screens.result);
+        showScreen(
+            screens.result
+        );
 
         return;
     }
@@ -1646,532 +1446,378 @@ function nextVoteReveal() {
 }
 
 /* =========================================================
-   CALCULATE RESULT
+   RESULT
 ========================================================= */
 
 function calculateResult() {
     const caught =
         selectedVotes.filter(
-            index =>
-                imposters.includes(index)
+            i => imposters.includes(i)
         ).length;
 
-    const allCaught =
-        caught === imposters.length;
-
     result = {
-        caught: caught,
-        allCaught: allCaught
+        caught,
+        allCaught:
+            caught ===
+            imposters.length
     };
 
     renderResult();
 }
 
-/* =========================================================
-   FINAL RESULT
-========================================================= */
-
 function renderResult() {
-    const icon =
-        document.getElementById("resultIcon");
+    const {
+        caught,
+        allCaught
+    } = result;
 
-    const eyebrow =
-        document.getElementById("resultEyebrow");
-
-    const title =
-        document.getElementById("resultTitle");
-
-    const description =
-        document.getElementById(
-            "resultDescription"
-        );
-
-    if (result && result.allCaught) {
-        if (icon) {
-            icon.className =
+    if (allCaught) {
+        if ($("resultIcon")) {
+            $("resultIcon").className =
                 "result-icon caught";
 
-            icon.textContent = "✓";
+            $("resultIcon").textContent =
+                "✓";
         }
 
-        if (eyebrow) {
-            eyebrow.textContent =
+        if ($("resultEyebrow")) {
+            $("resultEyebrow").textContent =
                 "ROUND WON";
         }
 
-        if (title) {
-            title.textContent =
+        if ($("resultTitle")) {
+            $("resultTitle").textContent =
                 "IMPOSTERS CAUGHT!";
         }
 
-        if (description) {
-            description.textContent =
+        if ($("resultDescription")) {
+            $("resultDescription").textContent =
                 "The group successfully identified every imposter.";
         }
     } else {
-        if (icon) {
-            icon.className =
+        if ($("resultIcon")) {
+            $("resultIcon").className =
                 "result-icon escaped";
 
-            icon.textContent = "✕";
+            $("resultIcon").textContent =
+                "✕";
         }
 
-        if (eyebrow) {
-            eyebrow.textContent =
+        if ($("resultEyebrow")) {
+            $("resultEyebrow").textContent =
                 "IMPOSTERS ESCAPED";
         }
 
-        if (title) {
-            title.textContent =
+        if ($("resultTitle")) {
+            $("resultTitle").textContent =
                 "THEY GOT AWAY!";
         }
 
-        if (description) {
-            description.textContent =
-                `${result ? result.caught : 0} of ${imposters.length} imposters were caught.`;
+        if ($("resultDescription")) {
+            $("resultDescription").textContent =
+                `${caught} of ${imposters.length} imposters were caught.`;
         }
     }
 
-    const actualList =
-        document.getElementById(
-            "actualImpostersList"
-        );
+    renderActualImposters();
+    renderDareResult();
+}
 
-    if (!actualList) return;
+function renderActualImposters() {
+    const list =
+        $("actualImpostersList");
 
-    actualList.innerHTML = `
-        <div class="final-results-grid">
+    if (!list) return;
 
-            <div class="final-result-column">
-                <div class="final-column-title">
-                    🕵️ ACTUAL IMPOSTERS
-                </div>
+    list.innerHTML = "";
 
-                <div id="actualPlayersColumn"></div>
-            </div>
-
-            <div class="final-result-column">
-                <div class="final-column-title">
-                    🗳️ YOUR VOTES
-                </div>
-
-                <div id="votedPlayersColumn"></div>
-            </div>
-
-        </div>
-    `;
-
-    const actualColumn =
-        document.getElementById(
-            "actualPlayersColumn"
-        );
-
-    const votedColumn =
-        document.getElementById(
-            "votedPlayersColumn"
-        );
-
-    /*
-       Correctly voted imposters align opposite
-       themselves.
-
-       If an actual imposter escaped, they are
-       aligned opposite another escaped/wrong vote.
-
-       If every vote was civilian, the remaining
-       alignment is randomized.
-    */
-
-    const pairs =
-        createAlignedResultPairs();
-
-    pairs.forEach(pair => {
-        const actualIndex =
-            pair.actual;
-
-        const votedIndex =
-            pair.voted;
-
-        if (
-            actualIndex === undefined ||
-            votedIndex === undefined
-        ) {
-            return;
-        }
-
-        const actualPlayer =
+    imposters.forEach(i => {
+        const div =
             document.createElement("div");
 
-        actualPlayer.className =
+        div.className =
             "final-player actual";
 
-        const actualWasVoted =
-            selectedVotes.includes(
-                actualIndex
-            );
+        const caught =
+            selectedVotes.includes(i);
 
-        actualPlayer.innerHTML = `
+        div.innerHTML = `
             <span class="avatar">
-                ${escapeHTML(
-                    players[actualIndex]
-                        .charAt(0)
+                ${esc(
+                    players[i][0]
                         .toUpperCase()
                 )}
             </span>
 
             <span class="final-player-name">
-                ${escapeHTML(
-                    players[actualIndex]
-                )}
+                ${esc(players[i])}
             </span>
 
             ${
-                actualWasVoted
+                caught
                     ? `
                         <span class="correct-mark">
                             CAUGHT ✓
                         </span>
-                      `
+                    `
                     : `
                         <span class="miss-mark">
                             ESCAPED ✕
                         </span>
-                      `
+                    `
             }
         `;
 
-        const votedPlayer =
-            document.createElement("div");
+        list.appendChild(div);
+    });
+}
 
-        votedPlayer.className =
-            "final-player voted";
+/* =========================================================
+   DARE RESULT
+========================================================= */
 
-        const votedWasImposter =
-            imposters.includes(
-                votedIndex
+function renderDareResult() {
+    const box =
+        $("dareResult");
+
+    const assignment =
+        $("dareAssignment");
+
+    if (!box) return;
+
+    if (!dareText) {
+        box.classList.add("hidden");
+        assignment?.classList.add("hidden");
+        return;
+    }
+
+    box.classList.remove("hidden");
+
+    if ($("dareResultMessage")) {
+        $("dareResultMessage").textContent =
+            result.allCaught
+                ? "The caught imposter must do this dare:"
+                : "The imposters escaped. One civilian must do this dare:";
+    }
+
+    if ($("finalDare")) {
+        $("finalDare").textContent =
+            dareText;
+    }
+
+    if (result.allCaught) {
+        dareAssignedPlayer =
+            getCaughtImposter();
+
+        assignment?.classList.add(
+            "hidden"
+        );
+    } else {
+        showCivilianAssignment();
+    }
+}
+
+function getCaughtImposter() {
+    const caught =
+        imposters.filter(
+            i => selectedVotes.includes(i)
+        );
+
+    return randomItem(caught);
+}
+
+/* =========================================================
+   CIVILIAN DARE
+========================================================= */
+
+function showCivilianAssignment() {
+    const assignment =
+        $("dareAssignment");
+
+    const list =
+        $("civilianList");
+
+    const message =
+        $("assignedDareMessage");
+
+    if (!assignment || !list) {
+        return;
+    }
+
+    assignment.classList.remove(
+        "hidden"
+    );
+
+    list.innerHTML = "";
+
+    message?.classList.add(
+        "hidden"
+    );
+
+    const civilians =
+        shuffle(
+            players
+                .map((_, i) => i)
+                .filter(
+                    i =>
+                        !imposters.includes(i)
+                )
+        );
+
+    civilians.forEach(i => {
+        const button =
+            document.createElement(
+                "button"
             );
 
-        votedPlayer.innerHTML = `
+        button.type = "button";
+        button.className =
+            "vote-card";
+
+        button.innerHTML = `
             <span class="avatar">
-                ${escapeHTML(
-                    players[votedIndex]
-                        .charAt(0)
+                ${esc(
+                    players[i][0]
                         .toUpperCase()
                 )}
             </span>
 
-            <span class="final-player-name">
-                ${escapeHTML(
-                    players[votedIndex]
-                )}
+            <span>
+                ${esc(players[i])}
             </span>
 
-            ${
-                votedWasImposter
-                    ? `
-                        <span class="correct-mark">
-                            IMPOSTER ✓
-                        </span>
-                      `
-                    : `
-                        <span class="miss-mark">
-                            CIVILIAN ✕
-                        </span>
-                      `
-            }
+            <span>🎯</span>
         `;
 
-        if (actualColumn) {
-            actualColumn.appendChild(
-                actualPlayer
-            );
-        }
+        button.addEventListener(
+            "click",
+            () => assignDare(i)
+        );
 
-        if (votedColumn) {
-            votedColumn.appendChild(
-                votedPlayer
-            );
-        }
+        list.appendChild(button);
     });
-
-    renderDareResult();
 }
 
-/* =========================================================
-   RESULT PAIRING
-========================================================= */
-
-function createAlignedResultPairs() {
-    const actual =
-        [...imposters];
-
-    const votes =
-        [...selectedVotes];
-
-    const pairs = [];
-
-    /*
-       1. Correctly voted imposters align
-          directly opposite themselves.
-    */
-
-    const correctVotes =
-        actual.filter(
-            index =>
-                votes.includes(index)
+function assignDare(i) {
+    if (imposters.includes(i)) {
+        alert(
+            "An imposter cannot be selected. Choose a civilian."
         );
 
-    const usedActual =
-        new Set();
-
-    const usedVotes =
-        new Set();
-
-    correctVotes.forEach(index => {
-        pairs.push({
-            actual: index,
-            voted: index
-        });
-
-        usedActual.add(index);
-        usedVotes.add(index);
-    });
-
-    /*
-       2. Remaining actual imposters
-          are escaped imposters.
-    */
-
-    const remainingActual =
-        actual.filter(
-            index =>
-                !usedActual.has(index)
-        );
-
-    /*
-       3. Remaining votes are wrong votes.
-    */
-
-    const remainingVotes =
-        votes.filter(
-            index =>
-                !usedVotes.has(index)
-        );
-
-    /*
-       Randomize the wrong votes so that
-       escaped imposters do not always appear
-       against the same civilian.
-    */
-
-    shuffleArray(remainingVotes);
-
-    /*
-       Align each escaped actual imposter
-       against one remaining vote.
-
-       If all votes were civilians, this
-       automatically creates random alignment.
-    */
-
-    remainingActual.forEach(
-        (actualIndex, position) => {
-            if (
-                remainingVotes[position] !==
-                undefined
-            ) {
-                pairs.push({
-                    actual: actualIndex,
-                    voted: remainingVotes[position]
-                });
-            }
-        }
-    );
-
-    return pairs;
-}
-
-/* =========================================================
-   DARE ON FINAL PAGE
-========================================================= */
-
-function renderDareResult() {
-    const dareResult =
-        document.getElementById(
-            "dareResult"
-        );
-
-    if (!dareResult) return;
-
-    if (!dareText) {
-        dareResult.classList.add("hidden");
         return;
     }
 
-    dareResult.classList.remove("hidden");
+    dareAssignedPlayer = i;
+
+    const list =
+        $("civilianList");
 
     const message =
-        document.getElementById(
-            "dareResultMessage"
-        );
+        $("assignedDareMessage");
 
-    const finalDare =
-        document.getElementById(
-            "finalDare"
-        );
-
-    if (message) {
-        message.textContent =
-            "THE DARE FOR THIS ROUND";
+    if (list) {
+        list.innerHTML = `
+            <div class="assigned-dare-message">
+                🎯
+                <strong>
+                    ${esc(players[i])}
+                </strong>
+                must do the dare!
+            </div>
+        `;
     }
 
-    if (finalDare) {
-        finalDare.textContent =
-            dareText;
+    if (message) {
+        message.classList.remove(
+            "hidden"
+        );
+
+        message.innerHTML = `
+            🎯
+            <strong>
+                ${esc(players[i])}
+            </strong>
+            has been chosen for the dare!
+        `;
     }
 }
 
 /* =========================================================
    PLAY AGAIN
-   RETURNS TO CATEGORY PAGE
 ========================================================= */
 
-if (playAgainBtn) {
-    playAgainBtn.addEventListener("click", () => {
+playAgainBtn?.addEventListener(
+    "click",
+    () => {
         selectedVotes = [];
         voteRevealIndex = 0;
 
         result = null;
-
-        dareEnabled = null;
-        dareText = "";
-
         secretWord = "";
-
         imposters = [];
 
         currentRevealIndex = 0;
-        secretShown = false;
 
-        /*
-           Keep players.
-           Keep category.
-           Return directly to category page.
-        */
+        randomSpeakingPlayer = null;
+        dareAssignedPlayer = null;
 
-        resetDareState();
-
+        resetDare();
         renderCategories();
 
-        showScreen(screens.category);
-    });
-}
+        showScreen(
+            screens.category
+        );
+    }
+);
 
 /* =========================================================
    NEW PLAYERS
 ========================================================= */
 
-if (newPlayersBtn) {
-    newPlayersBtn.addEventListener("click", () => {
+newPlayersBtn?.addEventListener(
+    "click",
+    () => {
         players = [];
-
-        selectedCategory = null;
-        selectedCategoryIndex = null;
+        selectedCategories = [];
         customCategory = null;
-
-        imposters = [];
-        recentImposters = [];
-
-        secretWord = "";
-
-        selectedVotes = [];
-
-        voteRevealIndex = 0;
-
-        result = null;
 
         imposterCount = 1;
 
         dareEnabled = null;
         dareText = "";
 
-        currentRevealIndex = 0;
-        secretShown = false;
+        secretWord = "";
+        imposters = [];
+        recentImposters = [];
 
-        resetDareState();
+        currentRevealIndex = 0;
+
+        selectedVotes = [];
+        voteRevealIndex = 0;
+
+        result = null;
+        randomSpeakingPlayer = null;
+        dareAssignedPlayer = null;
+
+        resetDare();
 
         renderPlayers();
         renderCategories();
+        updateImposterOptions();
 
-        showScreen(screens.players);
-    });
-}
-
-/* =========================================================
-   UTILITY — RANDOM ITEM
-========================================================= */
-
-function randomItem(array) {
-    if (!array || array.length === 0) {
-        return "";
+        showScreen(
+            screens.players
+        );
     }
-
-    return array[
-        Math.floor(
-            Math.random() * array.length
-        )
-    ];
-}
+);
 
 /* =========================================================
-   UTILITY — SHUFFLE
-========================================================= */
-
-function shuffleArray(array) {
-    for (
-        let i = array.length - 1;
-        i > 0;
-        i--
-    ) {
-        const j =
-            Math.floor(
-                Math.random() * (i + 1)
-            );
-
-        [
-            array[i],
-            array[j]
-        ] = [
-            array[j],
-            array[i]
-        ];
-    }
-
-    return array;
-}
-
-/* =========================================================
-   UTILITY — HTML ESCAPE
-========================================================= */
-
-function escapeHTML(value) {
-    return String(value)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-}
-
-/* =========================================================
-   INITIALIZATION
+   INITIALIZE
 ========================================================= */
 
 function initializeGame() {
     players = [];
-
-    selectedCategory = null;
-    selectedCategoryIndex = null;
+    selectedCategories = [];
     customCategory = null;
 
     imposterCount = 1;
@@ -2180,28 +1826,28 @@ function initializeGame() {
     dareText = "";
 
     secretWord = "";
-
     imposters = [];
     recentImposters = [];
 
     currentRevealIndex = 0;
-    secretShown = false;
 
     selectedVotes = [];
     voteRevealIndex = 0;
 
     result = null;
+    randomSpeakingPlayer = null;
+    dareAssignedPlayer = null;
+
+    wheelSpinning = false;
 
     renderPlayers();
     renderCategories();
     updateImposterOptions();
-    updateStartRoundButton();
+    updateStartRound();
 
-    showScreen(screens.home);
+    showScreen(
+        screens.home
+    );
 }
-
-/* =========================================================
-   START
-========================================================= */
 
 initializeGame();
