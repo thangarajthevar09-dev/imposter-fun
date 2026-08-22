@@ -1,9 +1,11 @@
 /* =========================================================
    IMPOSTER FUN — FULL GAME LOGIC
-   Updated:
+
+   Features:
    1. Combined PASS PHONE + YOU ARE screen
    2. Random speaker spin wheel
    3. Prevent inactive screens from scrolling
+   4. Multiple escaped imposters can select civilians
 ========================================================= */
 
 "use strict";
@@ -14,43 +16,193 @@
 
 const categories = [
     {
-        name: "Food", icon: "🍕",
-        words: ["Pizza","Burger","Sushi","Biryani","Dosa","Pasta","Tacos","Ice Cream","Noodles","Sandwich","Momos","Fried Rice"]
+        name: "Food",
+        icon: "🍕",
+        words: [
+            "Pizza",
+            "Burger",
+            "Sushi",
+            "Biryani",
+            "Dosa",
+            "Pasta",
+            "Tacos",
+            "Ice Cream",
+            "Noodles",
+            "Sandwich",
+            "Momos",
+            "Fried Rice"
+        ]
     },
+
     {
-        name: "Movies", icon: "🎬",
-        words: ["Avatar","Titanic","Inception","Interstellar","Dangal","Joker","Frozen","The Matrix","Avengers","Harry Potter","Jurassic Park","The Lion King"]
+        name: "Movies",
+        icon: "🎬",
+        words: [
+            "Avatar",
+            "Titanic",
+            "Inception",
+            "Interstellar",
+            "Dangal",
+            "Joker",
+            "Frozen",
+            "The Matrix",
+            "Avengers",
+            "Harry Potter",
+            "Jurassic Park",
+            "The Lion King"
+        ]
     },
+
     {
-        name: "South Indian Movies", icon: "🎥",
-        words: ["Baahubali","RRR","KGF","Pushpa","Kantara","Leo","Vikram","Jailer","Master","Drishyam","Eega","Lucifer","Premam","Kumbalangi Nights","Aavesham","Manjummel Boys","Arjun Reddy","Jersey","Rangasthalam","Dasara"]
+        name: "South Indian Movies",
+        icon: "🎥",
+        words: [
+            "Baahubali",
+            "RRR",
+            "KGF",
+            "Pushpa",
+            "Kantara",
+            "Leo",
+            "Vikram",
+            "Jailer",
+            "Master",
+            "Drishyam",
+            "Eega",
+            "Lucifer",
+            "Premam",
+            "Kumbalangi Nights",
+            "Aavesham",
+            "Manjummel Boys",
+            "Arjun Reddy",
+            "Jersey",
+            "Rangasthalam",
+            "Dasara"
+        ]
     },
+
     {
-        name: "IPL Teams", icon: "🏏",
-        words: ["Chennai Super Kings","Mumbai Indians","Royal Challengers Bengaluru","Kolkata Knight Riders","Rajasthan Royals","Sunrisers Hyderabad","Delhi Capitals","Punjab Kings","Lucknow Super Giants","Gujarat Titans"]
+        name: "IPL Teams",
+        icon: "🏏",
+        words: [
+            "Chennai Super Kings",
+            "Mumbai Indians",
+            "Royal Challengers Bengaluru",
+            "Kolkata Knight Riders",
+            "Rajasthan Royals",
+            "Sunrisers Hyderabad",
+            "Delhi Capitals",
+            "Punjab Kings",
+            "Lucknow Super Giants",
+            "Gujarat Titans"
+        ]
     },
+
     {
-        name: "Indian Food", icon: "🍛",
-        words: ["Butter Chicken","Biryani","Pav Bhaji","Chole Bhature","Masala Dosa","Idli","Vada","Samosa","Pani Puri","Rajma Chawal","Palak Paneer","Dal Makhani","Pongal","Parotta","Chicken 65","Fish Curry","Gulab Jamun","Jalebi","Rasgulla","Kheer"]
+        name: "Indian Food",
+        icon: "🍛",
+        words: [
+            "Butter Chicken",
+            "Biryani",
+            "Pav Bhaji",
+            "Chole Bhature",
+            "Masala Dosa",
+            "Idli",
+            "Vada",
+            "Samosa",
+            "Pani Puri",
+            "Rajma Chawal",
+            "Palak Paneer",
+            "Dal Makhani",
+            "Pongal",
+            "Parotta",
+            "Chicken 65",
+            "Fish Curry",
+            "Gulab Jamun",
+            "Jalebi",
+            "Rasgulla",
+            "Kheer"
+        ]
     },
+
     {
-        name: "Places", icon: "🌍",
-        words: ["Beach","Airport","School","Hospital","Mall","Temple","Mountain","Cinema","Restaurant","Hotel","Park","Railway Station"]
+        name: "Places",
+        icon: "🌍",
+        words: [
+            "Beach",
+            "Airport",
+            "School",
+            "Hospital",
+            "Mall",
+            "Temple",
+            "Mountain",
+            "Cinema",
+            "Restaurant",
+            "Hotel",
+            "Park",
+            "Railway Station"
+        ]
     },
+
     {
-        name: "Animals", icon: "🐯",
-        words: ["Tiger","Lion","Elephant","Dog","Cat","Monkey","Giraffe","Penguin","Dolphin","Horse","Rabbit","Crocodile"]
+        name: "Animals",
+        icon: "🐯",
+        words: [
+            "Tiger",
+            "Lion",
+            "Elephant",
+            "Dog",
+            "Cat",
+            "Monkey",
+            "Giraffe",
+            "Penguin",
+            "Dolphin",
+            "Horse",
+            "Rabbit",
+            "Crocodile"
+        ]
     },
+
     {
-        name: "Sports", icon: "⚽",
-        words: ["Cricket","Football","Tennis","Basketball","Badminton","Hockey","Boxing","Swimming","Golf","Volleyball","Kabaddi","Wrestling"]
+        name: "Sports",
+        icon: "⚽",
+        words: [
+            "Cricket",
+            "Football",
+            "Tennis",
+            "Basketball",
+            "Badminton",
+            "Hockey",
+            "Boxing",
+            "Swimming",
+            "Golf",
+            "Volleyball",
+            "Kabaddi",
+            "Wrestling"
+        ]
     },
+
     {
-        name: "Everyday", icon: "🏠",
-        words: ["Phone","Laptop","Bed","Chair","Mirror","Toothbrush","Umbrella","Backpack","Clock","Shoes","Television","Keys"]
+        name: "Everyday",
+        icon: "🏠",
+        words: [
+            "Phone",
+            "Laptop",
+            "Bed",
+            "Chair",
+            "Mirror",
+            "Toothbrush",
+            "Umbrella",
+            "Backpack",
+            "Clock",
+            "Shoes",
+            "Television",
+            "Keys"
+        ]
     },
+
     {
-        name: "Random", icon: "🎲",
+        name: "Random",
+        icon: "🎲",
         words: []
     }
 ];
@@ -64,6 +216,7 @@ let selectedCategories = [];
 let customCategory = null;
 
 let imposterCount = 1;
+
 let dareEnabled = null;
 let dareText = "";
 
@@ -72,12 +225,21 @@ let imposters = [];
 let recentImposters = [];
 
 let currentRevealIndex = 0;
+
 let selectedVotes = [];
 let voteRevealIndex = 0;
 
 let result = null;
 let randomSpeakingPlayer = null;
-let dareAssignedPlayer = null;
+
+/*
+   Stores all civilians selected for the dare.
+   Example:
+   1 escaped imposter -> [2]
+   2 escaped imposters -> [2, 5]
+   3 escaped imposters -> [1, 4, 6]
+*/
+let dareAssignedPlayers = [];
 
 let wheelSpinning = false;
 
@@ -145,7 +307,9 @@ const pickRandomPlayerBtn = $("pickRandomPlayerBtn");
 ========================================================= */
 
 function showScreen(screen) {
+
     Object.values(screens).forEach(s => {
+
         if (!s) return;
 
         s.classList.remove("active");
@@ -153,12 +317,14 @@ function showScreen(screen) {
     });
 
     if (screen) {
+
         screen.classList.add("active");
         screen.setAttribute("aria-hidden", "false");
     }
 
     document.documentElement.scrollTop = 0;
     document.body.scrollTop = 0;
+
     window.scrollTo(0, 0);
 }
 
@@ -171,16 +337,26 @@ const randomItem = arr =>
         ? arr[Math.floor(Math.random() * arr.length)]
         : null;
 
+
 function shuffle(arr) {
+
     for (let i = arr.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [arr[i], arr[j]] = [arr[j], arr[i]];
+
+        const j =
+            Math.floor(
+                Math.random() * (i + 1)
+            );
+
+        [arr[i], arr[j]] =
+            [arr[j], arr[i]];
     }
 
     return arr;
 }
 
+
 function esc(value) {
+
     return String(value)
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
@@ -189,50 +365,82 @@ function esc(value) {
         .replace(/'/g, "&#039;");
 }
 
+
 function maxImposters() {
-    return Math.max(1, players.length - 1);
+
+    return Math.max(
+        1,
+        players.length - 1
+    );
 }
 
+
 function categoryName() {
-    return selectedCategories.map(c => c.name).join(" + ");
+
+    return selectedCategories
+        .map(c => c.name)
+        .join(" + ");
 }
 
 /* =========================================================
    HOME
 ========================================================= */
 
-startGameBtn?.addEventListener("click", () => {
-    renderPlayers();
-    showScreen(screens.players);
+startGameBtn?.addEventListener(
+    "click",
+    () => {
 
-    setTimeout(() => {
-        playerNameInput?.focus();
-    }, 100);
-});
+        renderPlayers();
+
+        showScreen(
+            screens.players
+        );
+
+        setTimeout(() => {
+
+            playerNameInput?.focus();
+
+        }, 100);
+    }
+);
 
 /* =========================================================
    PLAYERS
 ========================================================= */
 
 function addPlayer() {
-    const name = playerNameInput?.value.trim();
+
+    const name =
+        playerNameInput?.value.trim();
 
     if (!name) {
+
         playerNameInput?.focus();
+
         return;
     }
 
     if (players.length >= 12) {
-        alert("You can have a maximum of 12 players.");
+
+        alert(
+            "You can have a maximum of 12 players."
+        );
+
         return;
     }
 
     if (
         players.some(
-            p => p.toLowerCase() === name.toLowerCase()
+            p =>
+                p.toLowerCase() ===
+                name.toLowerCase()
         )
     ) {
-        alert("That player is already added.");
+
+        alert(
+            "That player is already added."
+        );
+
         return;
     }
 
@@ -245,62 +453,106 @@ function addPlayer() {
     playerNameInput.focus();
 }
 
-addPlayerBtn?.addEventListener("click", addPlayer);
 
-playerNameInput?.addEventListener("keydown", e => {
-    if (e.key === "Enter") {
-        e.preventDefault();
-        addPlayer();
+addPlayerBtn?.addEventListener(
+    "click",
+    addPlayer
+);
+
+
+playerNameInput?.addEventListener(
+    "keydown",
+    e => {
+
+        if (e.key === "Enter") {
+
+            e.preventDefault();
+
+            addPlayer();
+        }
     }
-});
+);
+
 
 function renderPlayers() {
+
     if (!playersList) return;
 
     playersList.innerHTML = "";
 
-    players.forEach((name, i) => {
-        const card = document.createElement("div");
+    players.forEach(
+        (name, i) => {
 
-        card.className = "player-card";
+            const card =
+                document.createElement(
+                    "div"
+                );
 
-        card.innerHTML = `
-            <div class="avatar">
-                ${esc(name[0].toUpperCase())}
-            </div>
+            card.className =
+                "player-card";
 
-            <span>${esc(name)}</span>
-        `;
+            card.innerHTML = `
+                <div class="avatar">
+                    ${esc(
+                        name[0].toUpperCase()
+                    )}
+                </div>
 
-        const edit = document.createElement("button");
+                <span>
+                    ${esc(name)}
+                </span>
+            `;
 
-        edit.type = "button";
-        edit.textContent = "EDIT";
+            const edit =
+                document.createElement(
+                    "button"
+                );
 
-        edit.addEventListener("click", () => {
-            editPlayer(i);
-        });
+            edit.type = "button";
+            edit.textContent = "EDIT";
 
-        const remove = document.createElement("button");
+            edit.addEventListener(
+                "click",
+                () => {
+                    editPlayer(i);
+                }
+            );
 
-        remove.type = "button";
-        remove.textContent = "×";
-        remove.style.fontSize = "20px";
+            const remove =
+                document.createElement(
+                    "button"
+                );
 
-        remove.addEventListener("click", () => {
-            removePlayer(i);
-        });
+            remove.type = "button";
+            remove.textContent = "×";
+            remove.style.fontSize = "20px";
 
-        card.append(edit, remove);
-        playersList.appendChild(card);
-    });
+            remove.addEventListener(
+                "click",
+                () => {
+                    removePlayer(i);
+                }
+            );
+
+            card.append(
+                edit,
+                remove
+            );
+
+            playersList.appendChild(
+                card
+            );
+        }
+    );
 
     if (playerCountText) {
+
         playerCountText.textContent =
             `${players.length}/12 players`;
     }
 
     if (playersContinueBtn) {
+
         playersContinueBtn.disabled =
             players.length < 3;
     }
@@ -308,15 +560,19 @@ function renderPlayers() {
     updateImposterOptions();
 }
 
+
 function editPlayer(i) {
-    const newName = prompt(
-        "Edit player name:",
-        players[i]
-    );
+
+    const newName =
+        prompt(
+            "Edit player name:",
+            players[i]
+        );
 
     if (newName === null) return;
 
-    const name = newName.trim();
+    const name =
+        newName.trim();
 
     if (!name) return;
 
@@ -324,10 +580,15 @@ function editPlayer(i) {
         players.some(
             (p, index) =>
                 index !== i &&
-                p.toLowerCase() === name.toLowerCase()
+                p.toLowerCase() ===
+                name.toLowerCase()
         )
     ) {
-        alert("That player name already exists.");
+
+        alert(
+            "That player name already exists."
+        );
+
         return;
     }
 
@@ -336,108 +597,189 @@ function editPlayer(i) {
     renderPlayers();
 }
 
+
 function removePlayer(i) {
+
     players.splice(i, 1);
 
-    if (imposterCount > maxImposters()) {
-        imposterCount = maxImposters();
+    if (
+        imposterCount >
+        maxImposters()
+    ) {
+
+        imposterCount =
+            maxImposters();
     }
 
     renderPlayers();
 }
 
-playersBackBtn?.addEventListener("click", () => {
-    showScreen(screens.home);
-});
 
-playersContinueBtn?.addEventListener("click", () => {
-    if (players.length < 3) {
-        alert("You need at least 3 players.");
-        return;
+playersBackBtn?.addEventListener(
+    "click",
+    () => {
+
+        showScreen(
+            screens.home
+        );
     }
+);
 
-    renderCategories();
-    showScreen(screens.category);
-});
+
+playersContinueBtn?.addEventListener(
+    "click",
+    () => {
+
+        if (players.length < 3) {
+
+            alert(
+                "You need at least 3 players."
+            );
+
+            return;
+        }
+
+        renderCategories();
+
+        showScreen(
+            screens.category
+        );
+    }
+);
 
 /* =========================================================
    CATEGORIES
 ========================================================= */
 
 function renderCategories() {
+
     if (!categoryGrid) return;
 
     categoryGrid.innerHTML = "";
 
-    categories.forEach((cat, i) => {
-        const button = document.createElement("button");
+    categories.forEach(
+        (cat, i) => {
+
+            const button =
+                document.createElement(
+                    "button"
+                );
+
+            button.type = "button";
+
+            button.className =
+                "category-option";
+
+            if (
+                selectedCategories.some(
+                    c =>
+                        c.name ===
+                        cat.name
+                )
+            ) {
+
+                button.classList.add(
+                    "selected"
+                );
+            }
+
+            button.innerHTML = `
+                <span class="category-icon">
+                    ${cat.icon}
+                </span>
+
+                <span>
+                    ${esc(cat.name)}
+                </span>
+            `;
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    selectCategory(i);
+                }
+            );
+
+            categoryGrid.appendChild(
+                button
+            );
+        }
+    );
+
+    if (
+        customCategory?.words?.length
+    ) {
+
+        const button =
+            document.createElement(
+                "button"
+            );
 
         button.type = "button";
-        button.className = "category-option";
+
+        button.className =
+            "category-option";
 
         if (
             selectedCategories.some(
-                c => c.name === cat.name
+                c =>
+                    c.name ===
+                    customCategory.name
             )
         ) {
-            button.classList.add("selected");
+
+            button.classList.add(
+                "selected"
+            );
         }
 
         button.innerHTML = `
             <span class="category-icon">
-                ${cat.icon}
+                ✨
             </span>
 
-            <span>${esc(cat.name)}</span>
+            <span>
+                ${esc(
+                    customCategory.name
+                )}
+            </span>
         `;
 
-        button.addEventListener("click", () => {
-            selectCategory(i);
-        });
+        button.addEventListener(
+            "click",
+            () => {
 
-        categoryGrid.appendChild(button);
-    });
+                toggleCategory(
+                    customCategory
+                );
+            }
+        );
 
-    if (customCategory?.words?.length) {
-        const button = document.createElement("button");
-
-        button.type = "button";
-        button.className = "category-option";
-
-        if (
-            selectedCategories.some(
-                c => c.name === customCategory.name
-            )
-        ) {
-            button.classList.add("selected");
-        }
-
-        button.innerHTML = `
-            <span class="category-icon">✨</span>
-            <span>${esc(customCategory.name)}</span>
-        `;
-
-        button.addEventListener("click", () => {
-            toggleCategory(customCategory);
-        });
-
-        categoryGrid.appendChild(button);
+        categoryGrid.appendChild(
+            button
+        );
     }
 
     updateCategoryUI();
 }
 
+
 function selectCategory(i) {
-    const cat = categories[i];
+
+    const cat =
+        categories[i];
 
     if (!cat) return;
 
     if (cat.name === "Random") {
-        const available = categories.filter(
-            c =>
-                c.name !== "Random" &&
-                c.words.length
-        );
+
+        const available =
+            categories.filter(
+                c =>
+                    c.name !== "Random" &&
+                    c.words.length
+            );
 
         selectedCategories = [
             randomItem(available)
@@ -446,39 +788,69 @@ function selectCategory(i) {
         customCategory = null;
 
         renderCategories();
+
         return;
     }
 
     toggleCategory(cat);
 }
 
+
 function toggleCategory(cat) {
-    const i = selectedCategories.findIndex(
-        c => c.name === cat.name
-    );
+
+    const i =
+        selectedCategories.findIndex(
+            c =>
+                c.name ===
+                cat.name
+        );
 
     if (i >= 0) {
-        selectedCategories.splice(i, 1);
+
+        selectedCategories.splice(
+            i,
+            1
+        );
+
     } else {
-        selectedCategories.push(cat);
+
+        selectedCategories.push(
+            cat
+        );
     }
 
     renderCategories();
 }
 
-customCategoryBtn?.addEventListener("click", () => {
-    customCategoryForm?.classList.toggle("hidden");
 
-    if (
-        customCategoryForm &&
-        !customCategoryForm.classList.contains("hidden")
-    ) {
-        customCategoryName?.focus();
+customCategoryBtn?.addEventListener(
+    "click",
+    () => {
+
+        customCategoryForm?.classList.toggle(
+            "hidden"
+        );
+
+        if (
+            customCategoryForm &&
+            !customCategoryForm.classList.contains(
+                "hidden"
+            )
+        ) {
+
+            customCategoryName?.focus();
+        }
     }
-});
+);
+
 
 function updateCustomCategory() {
-    if (!customCategoryName || !customCategoryWords) {
+
+    if (
+        !customCategoryName ||
+        !customCategoryWords
+    ) {
+
         return;
     }
 
@@ -488,10 +860,18 @@ function updateCustomCategory() {
     const words =
         customCategoryWords.value
             .split(",")
-            .map(w => w.trim())
+            .map(
+                w => w.trim()
+            )
             .filter(Boolean);
 
-    if (!name || !words.length) return;
+    if (
+        !name ||
+        !words.length
+    ) {
+
+        return;
+    }
 
     customCategory = {
         name,
@@ -499,13 +879,20 @@ function updateCustomCategory() {
         words
     };
 
-    const i = selectedCategories.findIndex(
-        c => c.name === name
-    );
+    const i =
+        selectedCategories.findIndex(
+            c =>
+                c.name === name
+        );
 
     if (i < 0) {
-        selectedCategories.push(customCategory);
+
+        selectedCategories.push(
+            customCategory
+        );
+
     } else {
+
         selectedCategories[i] =
             customCategory;
     }
@@ -513,25 +900,32 @@ function updateCustomCategory() {
     renderCategories();
 }
 
+
 customCategoryName?.addEventListener(
     "input",
     updateCustomCategory
 );
+
 
 customCategoryWords?.addEventListener(
     "input",
     updateCustomCategory
 );
 
+
 function updateCategoryUI() {
+
     if (!categoryStatus) return;
 
     if (!selectedCategories.length) {
+
         categoryStatus.textContent =
             "Choose at least one category";
 
         if (categoryContinueBtn) {
-            categoryContinueBtn.disabled = true;
+
+            categoryContinueBtn.disabled =
+                true;
         }
 
         return;
@@ -543,29 +937,51 @@ function updateCategoryUI() {
             : `${selectedCategories.length} categories selected`;
 
     if (categoryContinueBtn) {
-        categoryContinueBtn.disabled = false;
+
+        categoryContinueBtn.disabled =
+            false;
     }
 }
 
-categoryBackBtn?.addEventListener("click", () => {
-    showScreen(screens.players);
-});
 
-categoryContinueBtn?.addEventListener("click", () => {
-    if (!selectedCategories.length) {
-        alert("Please select at least one category.");
-        return;
+categoryBackBtn?.addEventListener(
+    "click",
+    () => {
+
+        showScreen(
+            screens.players
+        );
     }
+);
 
-    updateImposterOptions();
-    showScreen(screens.imposter);
-});
+
+categoryContinueBtn?.addEventListener(
+    "click",
+    () => {
+
+        if (!selectedCategories.length) {
+
+            alert(
+                "Please select at least one category."
+            );
+
+            return;
+        }
+
+        updateImposterOptions();
+
+        showScreen(
+            screens.imposter
+        );
+    }
+);
 
 /* =========================================================
    IMPOSTERS
 ========================================================= */
 
 const imposterLabels = {
+
     1: "Lone Wolf",
     2: "Double Trouble",
     3: "Triple Threat",
@@ -579,80 +995,145 @@ const imposterLabels = {
     11: "Almost Everyone"
 };
 
+
 function updateImposterOptions() {
+
     if (!players.length) return;
 
-    const max = maxImposters();
+    const max =
+        maxImposters();
 
-    if (imposterCount > max) {
+    if (
+        imposterCount > max
+    ) {
+
         imposterCount = max;
     }
 
     const container =
-        document.querySelector(".imposter-options");
+        document.querySelector(
+            ".imposter-options"
+        );
 
     if (!container) return;
 
     container.innerHTML = "";
 
-    for (let n = 1; n <= max; n++) {
-        const button = document.createElement("button");
+    for (
+        let n = 1;
+        n <= max;
+        n++
+    ) {
+
+        const button =
+            document.createElement(
+                "button"
+            );
 
         button.type = "button";
-        button.className = "imposter-option";
 
-        if (n === imposterCount) {
-            button.classList.add("selected");
+        button.className =
+            "imposter-option";
+
+        if (
+            n === imposterCount
+        ) {
+
+            button.classList.add(
+                "selected"
+            );
         }
 
         button.innerHTML = `
-            <strong>${n}</strong>
+            <strong>
+                ${n}
+            </strong>
+
             <span>
-                ${imposterLabels[n] || `${n} Imposters`}
+                ${
+                    imposterLabels[n] ||
+                    `${n} Imposters`
+                }
             </span>
         `;
 
-        button.addEventListener("click", () => {
-            imposterCount = n;
-            updateImposterOptions();
-        });
+        button.addEventListener(
+            "click",
+            () => {
 
-        container.appendChild(button);
+                imposterCount = n;
+
+                updateImposterOptions();
+            }
+        );
+
+        container.appendChild(
+            button
+        );
     }
 
     if (imposterLimitText) {
+
         imposterLimitText.textContent =
-            `Maximum: ${max} imposter${max === 1 ? "" : "s"}`;
+            `Maximum: ${max} imposter${
+                max === 1 ? "" : "s"
+            }`;
     }
 }
 
-imposterBackBtn?.addEventListener("click", () => {
-    showScreen(screens.category);
-});
 
-imposterContinueBtn?.addEventListener("click", () => {
-    resetDare();
-    showScreen(screens.dare);
-});
+imposterBackBtn?.addEventListener(
+    "click",
+    () => {
+
+        showScreen(
+            screens.category
+        );
+    }
+);
+
+
+imposterContinueBtn?.addEventListener(
+    "click",
+    () => {
+
+        resetDare();
+
+        showScreen(
+            screens.dare
+        );
+    }
+);
 
 /* =========================================================
    DARE SETUP
 ========================================================= */
 
 function resetDare() {
+
     dareEnabled = null;
+
     dareText = "";
 
-    dareYesBtn?.classList.remove("selected");
-    dareNoBtn?.classList.remove("selected");
+    dareYesBtn?.classList.remove(
+        "selected"
+    );
 
-    dareInputContainer?.classList.add("hidden");
+    dareNoBtn?.classList.remove(
+        "selected"
+    );
+
+    dareInputContainer?.classList.add(
+        "hidden"
+    );
 
     if (dareInput) {
+
         dareInput.value = "";
     }
 
     if (dareStatus) {
+
         dareStatus.textContent =
             "Choose YES or NO";
     }
@@ -660,51 +1141,86 @@ function resetDare() {
     updateStartRound();
 }
 
-dareYesBtn?.addEventListener("click", () => {
-    dareEnabled = true;
 
-    dareYesBtn.classList.add("selected");
-    dareNoBtn?.classList.remove("selected");
+dareYesBtn?.addEventListener(
+    "click",
+    () => {
 
-    dareInputContainer?.classList.remove("hidden");
+        dareEnabled = true;
 
-    if (dareStatus) {
-        dareStatus.textContent =
-            "Enter the dare below";
+        dareYesBtn.classList.add(
+            "selected"
+        );
+
+        dareNoBtn?.classList.remove(
+            "selected"
+        );
+
+        dareInputContainer?.classList.remove(
+            "hidden"
+        );
+
+        if (dareStatus) {
+
+            dareStatus.textContent =
+                "Enter the dare below";
+        }
+
+        updateStartRound();
     }
+);
 
-    updateStartRound();
-});
 
-dareNoBtn?.addEventListener("click", () => {
-    dareEnabled = false;
-    dareText = "";
+dareNoBtn?.addEventListener(
+    "click",
+    () => {
 
-    dareNoBtn.classList.add("selected");
-    dareYesBtn?.classList.remove("selected");
+        dareEnabled = false;
 
-    dareInputContainer?.classList.add("hidden");
+        dareText = "";
 
-    if (dareInput) {
-        dareInput.value = "";
+        dareNoBtn.classList.add(
+            "selected"
+        );
+
+        dareYesBtn?.classList.remove(
+            "selected"
+        );
+
+        dareInputContainer?.classList.add(
+            "hidden"
+        );
+
+        if (dareInput) {
+
+            dareInput.value = "";
+        }
+
+        if (dareStatus) {
+
+            dareStatus.textContent =
+                "No dare this round";
+        }
+
+        updateStartRound();
     }
+);
 
-    if (dareStatus) {
-        dareStatus.textContent =
-            "No dare this round";
+
+dareInput?.addEventListener(
+    "input",
+    () => {
+
+        dareText =
+            dareInput.value.trim();
+
+        updateStartRound();
     }
+);
 
-    updateStartRound();
-});
-
-dareInput?.addEventListener("input", () => {
-    dareText =
-        dareInput.value.trim();
-
-    updateStartRound();
-});
 
 function updateStartRound() {
+
     if (!startRoundBtn) return;
 
     startRoundBtn.disabled =
@@ -715,53 +1231,81 @@ function updateStartRound() {
         );
 }
 
-dareBackBtn?.addEventListener("click", () => {
-    showScreen(screens.imposter);
-});
+
+dareBackBtn?.addEventListener(
+    "click",
+    () => {
+
+        showScreen(
+            screens.imposter
+        );
+    }
+);
 
 /* =========================================================
    START ROUND
 ========================================================= */
 
-startRoundBtn?.addEventListener("click", () => {
-    if (dareEnabled === null) {
-        alert("Please choose YES or NO for the dare.");
-        return;
+startRoundBtn?.addEventListener(
+    "click",
+    () => {
+
+        if (dareEnabled === null) {
+
+            alert(
+                "Please choose YES or NO for the dare."
+            );
+
+            return;
+        }
+
+        if (
+            dareEnabled &&
+            !dareInput?.value.trim()
+        ) {
+
+            alert(
+                "Please enter the dare."
+            );
+
+            dareInput?.focus();
+
+            return;
+        }
+
+        dareText =
+            dareEnabled
+                ? dareInput.value.trim()
+                : "";
+
+        if (!prepareRound()) {
+            return;
+        }
+
+        currentRevealIndex = 0;
+
+        showPlayerIdentity();
+
+        showScreen(
+            screens.reveal
+        );
     }
-
-    if (
-        dareEnabled &&
-        !dareInput?.value.trim()
-    ) {
-        alert("Please enter the dare.");
-        dareInput?.focus();
-        return;
-    }
-
-    dareText =
-        dareEnabled
-            ? dareInput.value.trim()
-            : "";
-
-    if (!prepareRound()) return;
-
-    currentRevealIndex = 0;
-
-    showPlayerIdentity();
-    showScreen(screens.reveal);
-});
+);
 
 /* =========================================================
    PREPARE ROUND
 ========================================================= */
 
 function prepareRound() {
+
     const words =
         selectedCategories.flatMap(
-            c => c.words || []
+            c =>
+                c.words || []
         );
 
     if (!words.length) {
+
         alert(
             "The selected categories contain no words."
         );
@@ -769,14 +1313,17 @@ function prepareRound() {
         return false;
     }
 
-    secretWord = randomItem(words);
+    secretWord =
+        randomItem(words);
 
-    imposters = chooseImposters();
+    imposters =
+        chooseImposters();
 
     if (
         imposters.length !==
         imposterCount
     ) {
+
         alert(
             "Could not create the required number of imposters."
         );
@@ -785,36 +1332,55 @@ function prepareRound() {
     }
 
     selectedVotes = [];
+
     voteRevealIndex = 0;
 
     result = null;
+
     randomSpeakingPlayer = null;
-    dareAssignedPlayer = null;
+
+    dareAssignedPlayers = [];
 
     return true;
 }
 
+
 function chooseImposters() {
+
     const indexes =
         shuffle(
-            players.map((_, i) => i)
+            players.map(
+                (_, i) => i
+            )
         );
 
     const fresh =
         indexes.filter(
-            i => !recentImposters.includes(i)
+            i =>
+                !recentImposters.includes(
+                    i
+                )
         );
 
     const old =
         indexes.filter(
-            i => recentImposters.includes(i)
+            i =>
+                recentImposters.includes(
+                    i
+                )
         );
 
     const chosen =
-        [...fresh, ...old]
-            .slice(0, imposterCount);
+        [
+            ...fresh,
+            ...old
+        ].slice(
+            0,
+            imposterCount
+        );
 
-    recentImposters = [...chosen];
+    recentImposters =
+        [...chosen];
 
     return chosen;
 }
@@ -824,28 +1390,41 @@ function chooseImposters() {
 ========================================================= */
 
 function showPlayerIdentity() {
-    const card = $("revealCard");
+
+    const card =
+        $("revealCard");
 
     if (!card) return;
 
     const player =
-        players[currentRevealIndex];
+        players[
+            currentRevealIndex
+        ];
 
     const progress =
-        ((currentRevealIndex + 1) /
-            players.length) * 100;
+        (
+            (currentRevealIndex + 1) /
+            players.length
+        ) * 100;
 
     if ($("revealProgressText")) {
+
         $("revealProgressText").textContent =
-            `PLAYER ${currentRevealIndex + 1} OF ${players.length}`;
+            `PLAYER ${
+                currentRevealIndex + 1
+            } OF ${
+                players.length
+            }`;
     }
 
     if ($("revealProgress")) {
+
         $("revealProgress").style.width =
             `${progress}%`;
     }
 
-    card.className = "reveal-card";
+    card.className =
+        "reveal-card";
 
     card.innerHTML = `
         <div class="reveal-icon">
@@ -856,22 +1435,17 @@ function showPlayerIdentity() {
             PASS THE PHONE TO
         </div>
 
-
         <p class="reveal-description">
-         
-            Make sure no one is watching you. Keep the phone hidden from other players
-            before continuing.
+            Make sure no one is watching you.
+            Keep the phone hidden from other
+            players before continuing.
         </p>
-
 
         <div class="pass-player-name">
             ${esc(player)}
         </div>
 
         <div class="reveal-divider"></div>
-
-    
-        </div>
 
         <button
             class="primary-btn"
@@ -893,12 +1467,16 @@ function showPlayerIdentity() {
 ========================================================= */
 
 function showCurrentSecret() {
-    const card = $("revealCard");
+
+    const card =
+        $("revealCard");
 
     if (!card) return;
 
     const player =
-        players[currentRevealIndex];
+        players[
+            currentRevealIndex
+        ];
 
     const imposter =
         imposters.includes(
@@ -909,7 +1487,10 @@ function showCurrentSecret() {
         "reveal-card";
 
     if (imposter) {
-        card.classList.add("danger");
+
+        card.classList.add(
+            "danger"
+        );
 
         card.innerHTML = `
             <div class="reveal-icon">
@@ -955,7 +1536,9 @@ function showCurrentSecret() {
                 HIDE & PASS →
             </button>
         `;
+
     } else {
+
         card.innerHTML = `
             <div class="reveal-icon">
                 🔐
@@ -1016,26 +1599,24 @@ function showCurrentSecret() {
 ========================================================= */
 
 function finishReveal() {
+
     if (
         currentRevealIndex >=
         players.length - 1
     ) {
+
         showDiscussion();
+
         return;
     }
 
     currentRevealIndex++;
 
-    /*
-       IMPORTANT:
-       We DO NOT show passScreen anymore.
-
-       The next player receives the same combined
-       PASS THE PHONE + YOU ARE screen.
-    */
-
     showPlayerIdentity();
-    showScreen(screens.reveal);
+
+    showScreen(
+        screens.reveal
+    );
 }
 
 /* =========================================================
@@ -1045,10 +1626,14 @@ function finishReveal() {
 nextRevealBtn?.addEventListener(
     "click",
     e => {
+
         e.preventDefault();
 
         showPlayerIdentity();
-        showScreen(screens.reveal);
+
+        showScreen(
+            screens.reveal
+        );
     }
 );
 
@@ -1057,13 +1642,16 @@ nextRevealBtn?.addEventListener(
 ========================================================= */
 
 function showDiscussion() {
+
     randomSpeakingPlayer = null;
+
     wheelSpinning = false;
 
     const box =
         $("randomPlayerBox");
 
     if (box) {
+
         box.innerHTML = `
             <div class="wheel-display">
                 🎡
@@ -1076,27 +1664,37 @@ function showDiscussion() {
     }
 
     if (pickRandomPlayerBtn) {
-        pickRandomPlayerBtn.disabled = false;
+
+        pickRandomPlayerBtn.disabled =
+            false;
+
         pickRandomPlayerBtn.textContent =
             "🎡 SPIN THE WHEEL";
     }
 
-    showScreen(screens.discussion);
+    showScreen(
+        screens.discussion
+    );
 }
+
 
 pickRandomPlayerBtn?.addEventListener(
     "click",
     () => {
+
         if (
             wheelSpinning ||
             !players.length
         ) {
+
             return;
         }
 
         wheelSpinning = true;
 
-        pickRandomPlayerBtn.disabled = true;
+        pickRandomPlayerBtn.disabled =
+            true;
+
         pickRandomPlayerBtn.textContent =
             "🎡 SPINNING...";
 
@@ -1104,66 +1702,84 @@ pickRandomPlayerBtn?.addEventListener(
             $("randomPlayerBox");
 
         let step = 0;
+
         const totalSteps =
-            18 + Math.floor(
+            18 +
+            Math.floor(
                 Math.random() * 12
             );
 
         const interval =
-            setInterval(() => {
-                const preview =
-                    players[
-                        step %
-                        players.length
-                    ];
+            setInterval(
+                () => {
 
-                if (box) {
-                    box.innerHTML = `
-                        <div class="wheel-display">
-                            🎡
-                        </div>
-
-                        <strong>
-                            ${esc(preview)}
-                        </strong>
-                    `;
-                }
-
-                step++;
-
-                if (step >= totalSteps) {
-                    clearInterval(interval);
-
-                    randomSpeakingPlayer =
-                        randomItem(players);
+                    const preview =
+                        players[
+                            step %
+                            players.length
+                        ];
 
                     if (box) {
+
                         box.innerHTML = `
                             <div class="wheel-display">
-                                🎤
+                                🎡
                             </div>
 
                             <strong>
-                                ${esc(
-                                    randomSpeakingPlayer
-                                )}
+                                ${esc(preview)}
                             </strong>
-
-                            <span>
-                                speaks first!
-                            </span>
                         `;
                     }
 
-                    pickRandomPlayerBtn.disabled =
-                        false;
+                    step++;
 
-                    pickRandomPlayerBtn.textContent =
-                        "🎡 SPIN AGAIN";
+                    if (
+                        step >=
+                        totalSteps
+                    ) {
 
-                    wheelSpinning = false;
-                }
-            }, 80);
+                        clearInterval(
+                            interval
+                        );
+
+                        randomSpeakingPlayer =
+                            randomItem(
+                                players
+                            );
+
+                        if (box) {
+
+                            box.innerHTML = `
+                                <div class="wheel-display">
+                                    🎤
+                                </div>
+
+                                <strong>
+                                    ${esc(
+                                        randomSpeakingPlayer
+                                    )}
+                                </strong>
+
+                                <span>
+                                    speaks first!
+                                </span>
+                            `;
+                        }
+
+                        pickRandomPlayerBtn.disabled =
+                            false;
+
+                        pickRandomPlayerBtn.textContent =
+                            "🎡 SPIN AGAIN";
+
+                        wheelSpinning =
+                            false;
+                    }
+
+                },
+                80
+            );
     }
 );
 
@@ -1174,11 +1790,14 @@ pickRandomPlayerBtn?.addEventListener(
 goVotingBtn?.addEventListener(
     "click",
     () => {
+
         selectedVotes = [];
 
         renderVoting();
 
-        showScreen(screens.voting);
+        showScreen(
+            screens.voting
+        );
     }
 );
 
@@ -1187,7 +1806,9 @@ goVotingBtn?.addEventListener(
 ========================================================= */
 
 function renderVoting() {
+
     if ($("requiredVoteCount")) {
+
         $("requiredVoteCount").textContent =
             String(imposterCount);
     }
@@ -1201,12 +1822,14 @@ function renderVoting() {
 
     players.forEach(
         (player, i) => {
+
             const button =
                 document.createElement(
                     "button"
                 );
 
             button.type = "button";
+
             button.className =
                 "vote-card";
 
@@ -1214,6 +1837,7 @@ function renderVoting() {
                 selectedVotes.includes(i);
 
             if (selected) {
+
                 button.classList.add(
                     "selected"
                 );
@@ -1222,8 +1846,7 @@ function renderVoting() {
             button.innerHTML = `
                 <span class="avatar">
                     ${esc(
-                        player[0]
-                            .toUpperCase()
+                        player[0].toUpperCase()
                     )}
                 </span>
 
@@ -1232,35 +1855,51 @@ function renderVoting() {
                 </span>
 
                 <span class="vote-check">
-                    ${selected ? "✓" : ""}
+                    ${
+                        selected
+                            ? "✓"
+                            : ""
+                    }
                 </span>
             `;
 
             button.addEventListener(
                 "click",
-                () => toggleVote(i)
+                () => {
+
+                    toggleVote(i);
+                }
             );
 
-            list.appendChild(button);
+            list.appendChild(
+                button
+            );
         }
     );
 
     updateVoteCounter();
 }
 
+
 function toggleVote(i) {
+
     if (
         selectedVotes.includes(i)
     ) {
+
         selectedVotes =
             selectedVotes.filter(
-                v => v !== i
+                v =>
+                    v !== i
             );
+
     } else {
+
         if (
             selectedVotes.length >=
             imposterCount
         ) {
+
             return;
         }
 
@@ -1270,25 +1909,32 @@ function toggleVote(i) {
     renderVoting();
 }
 
+
 function updateVoteCounter() {
+
     const count =
         selectedVotes.length;
 
     if ($("voteCounter")) {
+
         $("voteCounter").textContent =
             `${count} / ${imposterCount}`;
     }
 
     if ($("submitVoteBtn")) {
+
         $("submitVoteBtn").disabled =
             count !== imposterCount;
     }
 
     if ($("voteStatus")) {
+
         $("voteStatus").textContent =
             count === imposterCount
                 ? "Ready to reveal."
-                : `Choose ${imposterCount} player${
+                : `Choose ${
+                    imposterCount
+                } player${
                     imposterCount === 1
                         ? ""
                         : "s"
@@ -1296,13 +1942,16 @@ function updateVoteCounter() {
     }
 }
 
+
 submitVoteBtn?.addEventListener(
     "click",
     () => {
+
         if (
             selectedVotes.length !==
             imposterCount
         ) {
+
             return;
         }
 
@@ -1321,6 +1970,7 @@ submitVoteBtn?.addEventListener(
 ========================================================= */
 
 function renderVoteReveal() {
+
     const selectedIndex =
         selectedVotes[
             voteRevealIndex
@@ -1335,15 +1985,23 @@ function renderVoteReveal() {
         );
 
     const progress =
-        ((voteRevealIndex + 1) /
-            selectedVotes.length) * 100;
+        (
+            (voteRevealIndex + 1) /
+            selectedVotes.length
+        ) * 100;
 
     if ($("voteRevealProgressText")) {
+
         $("voteRevealProgressText").textContent =
-            `REVEAL ${voteRevealIndex + 1} OF ${selectedVotes.length}`;
+            `REVEAL ${
+                voteRevealIndex + 1
+            } OF ${
+                selectedVotes.length
+            }`;
     }
 
     if ($("voteRevealProgress")) {
+
         $("voteRevealProgress").style.width =
             `${progress}%`;
     }
@@ -1357,7 +2015,10 @@ function renderVoteReveal() {
         "reveal-card";
 
     if (actualImposter) {
-        card.classList.add("danger");
+
+        card.classList.add(
+            "danger"
+        );
 
         card.innerHTML = `
             <div class="reveal-icon">
@@ -1388,7 +2049,9 @@ function renderVoteReveal() {
                 CONTINUE →
             </button>
         `;
+
     } else {
+
         card.innerHTML = `
             <div class="reveal-icon">
                 ❌
@@ -1426,11 +2089,14 @@ function renderVoteReveal() {
     );
 }
 
+
 function nextVoteReveal() {
+
     if (
         voteRevealIndex >=
         selectedVotes.length - 1
     ) {
+
         calculateResult();
 
         showScreen(
@@ -1450,13 +2116,17 @@ function nextVoteReveal() {
 ========================================================= */
 
 function calculateResult() {
+
     const caught =
         selectedVotes.filter(
-            i => imposters.includes(i)
+            i =>
+                imposters.includes(i)
         ).length;
 
     result = {
+
         caught,
+
         allCaught:
             caught ===
             imposters.length
@@ -1465,14 +2135,18 @@ function calculateResult() {
     renderResult();
 }
 
+
 function renderResult() {
+
     const {
         caught,
         allCaught
     } = result;
 
     if (allCaught) {
+
         if ($("resultIcon")) {
+
             $("resultIcon").className =
                 "result-icon caught";
 
@@ -1481,21 +2155,27 @@ function renderResult() {
         }
 
         if ($("resultEyebrow")) {
+
             $("resultEyebrow").textContent =
                 "ROUND WON";
         }
 
         if ($("resultTitle")) {
+
             $("resultTitle").textContent =
                 "IMPOSTERS CAUGHT!";
         }
 
         if ($("resultDescription")) {
+
             $("resultDescription").textContent =
                 "The group successfully identified every imposter.";
         }
+
     } else {
+
         if ($("resultIcon")) {
+
             $("resultIcon").className =
                 "result-icon escaped";
 
@@ -1504,26 +2184,32 @@ function renderResult() {
         }
 
         if ($("resultEyebrow")) {
+
             $("resultEyebrow").textContent =
                 "IMPOSTERS ESCAPED";
         }
 
         if ($("resultTitle")) {
+
             $("resultTitle").textContent =
                 "THEY GOT AWAY!";
         }
 
         if ($("resultDescription")) {
+
             $("resultDescription").textContent =
                 `${caught} of ${imposters.length} imposters were caught.`;
         }
     }
 
     renderActualImposters();
+
     renderDareResult();
 }
 
+
 function renderActualImposters() {
+
     const list =
         $("actualImpostersList");
 
@@ -1531,45 +2217,52 @@ function renderActualImposters() {
 
     list.innerHTML = "";
 
-    imposters.forEach(i => {
-        const div =
-            document.createElement("div");
+    imposters.forEach(
+        i => {
 
-        div.className =
-            "final-player actual";
+            const div =
+                document.createElement(
+                    "div"
+                );
 
-        const caught =
-            selectedVotes.includes(i);
+            div.className =
+                "final-player actual";
 
-        div.innerHTML = `
-            <span class="avatar">
-                ${esc(
-                    players[i][0]
-                        .toUpperCase()
-                )}
-            </span>
+            const caught =
+                selectedVotes.includes(i);
 
-            <span class="final-player-name">
-                ${esc(players[i])}
-            </span>
+            div.innerHTML = `
+                <span class="avatar">
+                    ${esc(
+                        players[i][0]
+                            .toUpperCase()
+                    )}
+                </span>
 
-            ${
-                caught
-                    ? `
-                        <span class="correct-mark">
-                            CAUGHT ✓
-                        </span>
-                    `
-                    : `
-                        <span class="miss-mark">
-                            ESCAPED ✕
-                        </span>
-                    `
-            }
-        `;
+                <span class="final-player-name">
+                    ${esc(players[i])}
+                </span>
 
-        list.appendChild(div);
-    });
+                ${
+                    caught
+                        ? `
+                            <span class="correct-mark">
+                                CAUGHT ✓
+                            </span>
+                        `
+                        : `
+                            <span class="miss-mark">
+                                ESCAPED ✕
+                            </span>
+                        `
+                }
+            `;
+
+            list.appendChild(
+                div
+            );
+        }
+    );
 }
 
 /* =========================================================
@@ -1577,6 +2270,7 @@ function renderActualImposters() {
 ========================================================= */
 
 function renderDareResult() {
+
     const box =
         $("dareResult");
 
@@ -1586,44 +2280,75 @@ function renderDareResult() {
     if (!box) return;
 
     if (!dareText) {
-        box.classList.add("hidden");
-        assignment?.classList.add("hidden");
+
+        box.classList.add(
+            "hidden"
+        );
+
+        assignment?.classList.add(
+            "hidden"
+        );
+
         return;
     }
 
-    box.classList.remove("hidden");
+    box.classList.remove(
+        "hidden"
+    );
 
     if ($("dareResultMessage")) {
+
         $("dareResultMessage").textContent =
             result.allCaught
                 ? "The caught imposter must do this dare:"
-                : "The imposters escaped. One civilian must do this dare:";
+                : "The escaped imposters must each select a civilian to do this dare:";
     }
 
     if ($("finalDare")) {
+
         $("finalDare").textContent =
             dareText;
     }
 
     if (result.allCaught) {
-        dareAssignedPlayer =
+
+        dareAssignedPlayers = [];
+
+        const caughtImposter =
             getCaughtImposter();
+
+        if (
+            caughtImposter !== null &&
+            caughtImposter !== undefined
+        ) {
+
+            dareAssignedPlayers.push(
+                caughtImposter
+            );
+        }
 
         assignment?.classList.add(
             "hidden"
         );
+
     } else {
+
         showCivilianAssignment();
     }
 }
 
+
 function getCaughtImposter() {
+
     const caught =
         imposters.filter(
-            i => selectedVotes.includes(i)
+            i =>
+                selectedVotes.includes(i)
         );
 
-    return randomItem(caught);
+    return randomItem(
+        caught
+    );
 }
 
 /* =========================================================
@@ -1631,6 +2356,7 @@ function getCaughtImposter() {
 ========================================================= */
 
 function showCivilianAssignment() {
+
     const assignment =
         $("dareAssignment");
 
@@ -1640,7 +2366,11 @@ function showCivilianAssignment() {
     const message =
         $("assignedDareMessage");
 
-    if (!assignment || !list) {
+    if (
+        !assignment ||
+        !list
+    ) {
+
         return;
     }
 
@@ -1654,25 +2384,186 @@ function showCivilianAssignment() {
         "hidden"
     );
 
+    dareAssignedPlayers = [];
+
+    /*
+       IMPORTANT:
+       Only ESCAPED imposters count.
+
+       Example:
+
+       2 total imposters
+       2 escaped
+       -> 2 civilians required
+
+       2 total imposters
+       1 escaped
+       -> 1 civilian required
+    */
+
+    const escapedImposters =
+        imposters.filter(
+            i =>
+                !selectedVotes.includes(i)
+        );
+
+    const requiredSelections =
+        escapedImposters.length;
+
     const civilians =
         shuffle(
             players
-                .map((_, i) => i)
+                .map(
+                    (_, i) => i
+                )
                 .filter(
                     i =>
-                        !imposters.includes(i)
+                        !imposters.includes(
+                            i
+                        )
                 )
         );
 
-    civilians.forEach(i => {
-        const button =
-            document.createElement(
-                "button"
+    civilians.forEach(
+        i => {
+
+            const button =
+                document.createElement(
+                    "button"
+                );
+
+            button.type =
+                "button";
+
+            button.className =
+                "vote-card";
+
+            button.innerHTML = `
+                <span class="avatar">
+                    ${esc(
+                        players[i][0]
+                            .toUpperCase()
+                    )}
+                </span>
+
+                <span>
+                    ${esc(players[i])}
+                </span>
+
+                <span>
+                    🎯
+                </span>
+            `;
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    assignDare(
+                        i,
+                        button,
+                        requiredSelections
+                    );
+                }
             );
 
-        button.type = "button";
-        button.className =
-            "vote-card";
+            list.appendChild(
+                button
+            );
+        }
+    );
+
+    if (message) {
+
+        message.classList.remove(
+            "hidden"
+        );
+
+        message.innerHTML = `
+            🎯 Select
+            <strong>
+                ${requiredSelections}
+            </strong>
+            civilian${
+                requiredSelections > 1
+                    ? "s"
+                    : ""
+            }
+            for the dare.
+        `;
+    }
+}
+
+
+function assignDare(
+    i,
+    button,
+    requiredSelections
+) {
+
+    const list =
+        $("civilianList");
+
+    const message =
+        $("assignedDareMessage");
+
+    /*
+       Safety check:
+       An imposter can never receive this
+       civilian dare.
+    */
+
+    if (
+        imposters.includes(i)
+    ) {
+
+        alert(
+            "An imposter cannot be selected. Choose a civilian."
+        );
+
+        return;
+    }
+
+    /*
+       Prevent the same civilian from
+       being selected twice.
+    */
+
+    if (
+        dareAssignedPlayers.includes(i)
+    ) {
+
+        return;
+    }
+
+    /*
+       Prevent selecting more civilians
+       than the number of escaped imposters.
+    */
+
+    if (
+        dareAssignedPlayers.length >=
+        requiredSelections
+    ) {
+
+        return;
+    }
+
+    /*
+       Add selected civilian.
+    */
+
+    dareAssignedPlayers.push(i);
+
+    /*
+       Mark selected button.
+    */
+
+    if (button) {
+
+        button.classList.add(
+            "selected"
+        );
 
         button.innerHTML = `
             <span class="avatar">
@@ -1686,48 +2577,18 @@ function showCivilianAssignment() {
                 ${esc(players[i])}
             </span>
 
-            <span>🎯</span>
-        `;
-
-        button.addEventListener(
-            "click",
-            () => assignDare(i)
-        );
-
-        list.appendChild(button);
-    });
-}
-
-function assignDare(i) {
-    if (imposters.includes(i)) {
-        alert(
-            "An imposter cannot be selected. Choose a civilian."
-        );
-
-        return;
-    }
-
-    dareAssignedPlayer = i;
-
-    const list =
-        $("civilianList");
-
-    const message =
-        $("assignedDareMessage");
-
-    if (list) {
-        list.innerHTML = `
-            <div class="assigned-dare-message">
-                🎯
-                <strong>
-                    ${esc(players[i])}
-                </strong>
-                must do the dare!
-            </div>
+            <span>
+                ✓
+            </span>
         `;
     }
+
+    /*
+       Update progress.
+    */
 
     if (message) {
+
         message.classList.remove(
             "hidden"
         );
@@ -1735,10 +2596,69 @@ function assignDare(i) {
         message.innerHTML = `
             🎯
             <strong>
-                ${esc(players[i])}
+                ${dareAssignedPlayers.length}
+                / ${requiredSelections}
             </strong>
-            has been chosen for the dare!
+            civilians selected.
         `;
+    }
+
+    /*
+       All required civilians selected.
+    */
+
+    if (
+        dareAssignedPlayers.length ===
+        requiredSelections
+    ) {
+
+        const selectedNames =
+            dareAssignedPlayers
+                .map(
+                    i =>
+                        esc(
+                            players[i]
+                        )
+                )
+                .join(", ");
+
+        const verb =
+            requiredSelections > 1
+                ? "have been chosen"
+                : "has been chosen";
+
+        if (list) {
+
+            list.innerHTML = `
+                <div class="assigned-dare-message">
+                    🎯
+
+                    <strong>
+                        ${selectedNames}
+                    </strong>
+
+                    must do the dare!
+                </div>
+            `;
+        }
+
+        if (message) {
+
+            message.classList.remove(
+                "hidden"
+            );
+
+            message.innerHTML = `
+                🎯
+
+                <strong>
+                    ${selectedNames}
+                </strong>
+
+                ${verb}
+                for the dare!
+            `;
+        }
     }
 }
 
@@ -1749,19 +2669,25 @@ function assignDare(i) {
 playAgainBtn?.addEventListener(
     "click",
     () => {
+
         selectedVotes = [];
+
         voteRevealIndex = 0;
 
         result = null;
+
         secretWord = "";
+
         imposters = [];
 
         currentRevealIndex = 0;
 
         randomSpeakingPlayer = null;
-        dareAssignedPlayer = null;
+
+        dareAssignedPlayers = [];
 
         resetDare();
+
         renderCategories();
 
         showScreen(
@@ -1777,32 +2703,45 @@ playAgainBtn?.addEventListener(
 newPlayersBtn?.addEventListener(
     "click",
     () => {
+
         players = [];
+
         selectedCategories = [];
+
         customCategory = null;
 
         imposterCount = 1;
 
         dareEnabled = null;
+
         dareText = "";
 
         secretWord = "";
+
         imposters = [];
+
         recentImposters = [];
 
         currentRevealIndex = 0;
 
         selectedVotes = [];
+
         voteRevealIndex = 0;
 
         result = null;
+
         randomSpeakingPlayer = null;
-        dareAssignedPlayer = null;
+
+        dareAssignedPlayers = [];
+
+        wheelSpinning = false;
 
         resetDare();
 
         renderPlayers();
+
         renderCategories();
+
         updateImposterOptions();
 
         showScreen(
@@ -1816,33 +2755,45 @@ newPlayersBtn?.addEventListener(
 ========================================================= */
 
 function initializeGame() {
+
     players = [];
+
     selectedCategories = [];
+
     customCategory = null;
 
     imposterCount = 1;
 
     dareEnabled = null;
+
     dareText = "";
 
     secretWord = "";
+
     imposters = [];
+
     recentImposters = [];
 
     currentRevealIndex = 0;
 
     selectedVotes = [];
+
     voteRevealIndex = 0;
 
     result = null;
+
     randomSpeakingPlayer = null;
-    dareAssignedPlayer = null;
+
+    dareAssignedPlayers = [];
 
     wheelSpinning = false;
 
     renderPlayers();
+
     renderCategories();
+
     updateImposterOptions();
+
     updateStartRound();
 
     showScreen(
